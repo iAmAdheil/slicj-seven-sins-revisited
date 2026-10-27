@@ -1,0 +1,15 @@
+\begin{table}[t]\centering\caption{RQ2: prevalence of the seven smells and the new TLS smell in the GLITCH corpora (occurrences / density per KLOC / \% of scripts).}\label{tab:rq2}
+\scriptsize\setlength{\tabcolsep}{1.6pt}\begin{tabular}{lrrr}\toprule
+ & Puppet & Ansible & Chef \\
+Scripts & 27,324 & 107,955 & 70,705 \\
+KLOC & 1,040 & 5,142 & 6,062 \\ \midrule
+Admin by default & 1,452 / 1.40 / 2.0 & 10,367 / 2.02 / 5.7 & 2,565 / 0.42 / 2.1 \\
+Empty password & 746 / 0.72 / 1.6 & 590 / 0.11 / 0.4 & 99 / 0.02 / 0.1 \\
+Hard-coded secret & 4,814 / 4.63 / 7.6 & 35,145 / 6.84 / 12.5 & 10,719 / 1.77 / 6.8 \\
+Invalid IP address binding & 245 / 0.24 / 0.7 & 2,657 / 0.52 / 1.0 & 1,270 / 0.21 / 0.9 \\
+Suspicious comment & 1,806 / 1.74 / 4.4 & 5,718 / 1.11 / 3.6 & 10,634 / 1.75 / 8.1 \\
+Use of HTTP without TLS & 1,547 / 1.49 / 3.2 & 8,184 / 1.59 / 3.8 & 11,653 / 1.92 / 5.5 \\
+Use of weak crypto. algo. & 149 / 0.14 / 0.4 & 234 / 0.05 / 0.2 & 409 / 0.07 / 0.4 \\
+\textit{TLS verif.\ disabled (new)} & 31 / 0.03 / 0.1 & 2,048 / 0.40 / 1.0 & 64 / 0.01 / 0.1 \\
+\midrule Any of seven (\% scripts) & 14.5 & 18.2 & 18.7 \\
+\bottomrule\end{tabular}\end{table}

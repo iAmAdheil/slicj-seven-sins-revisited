@@ -1,0 +1,74 @@
+FILE,LINE,SMELL,TOKEN,NAME,VALUE
+recipes/DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,130,hardcoded_secret,ATTRIBUTE,user,root
+recipes/DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,153,hardcoded_secret,ATTRIBUTE,user,root
+recipes/DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,174,hardcoded_secret,ATTRIBUTE,user,root
+recipes/DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,184,hardcoded_secret,ATTRIBUTE,user,root
+recipes/DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb,87,hardcoded_secret,ATTRIBUTE,user,root
+recipes/DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb,126,hardcoded_secret,ATTRIBUTE,user,root
+recipes/Nikhil424_chef-repo-cookbooks-jdk-recipes-default.rb,11,hardcoded_secret,ATTRIBUTE,user,root
+recipes/Nikhil424_chef-repo-cookbooks-jdk-recipes-default.rb,15,hardcoded_secret,ATTRIBUTE,user,root
+recipes/Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,14,http_without_tls,ATTRIBUTE,baseurl,http://repo.mysql.com/yum/mysql-5.7-community/el/6/$basearch/
+recipes/Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,16,http_without_tls,ATTRIBUTE,baseurl,http://repo.mysql.com/yum/mysql-5.7-community/el/6/$basearch/
+recipes/Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,18,http_without_tls,ATTRIBUTE,baseurl,http://repo.mysql.com/yum/mysql-5.7-community/el/6/$basearch/
+recipes/Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,20,http_without_tls,ATTRIBUTE,baseurl,http://repo.mysql.com/yum/mysql-5.7-community/el/6/$basearch/
+recipes/Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,26,http_without_tls,ATTRIBUTE,baseurl,http://repo.mysql.com/yum/mysql-5.7-community/el/5/$basearch/
+recipes/Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,28,http_without_tls,ATTRIBUTE,baseurl,http://repo.mysql.com/yum/mysql-5.7-community/el/6/$basearch/
+recipes/Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,30,http_without_tls,ATTRIBUTE,baseurl,http://repo.mysql.com/yum/mysql-5.7-community/el/7/$basearch/
+recipes/Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,33,http_without_tls,ATTRIBUTE,baseurl,http://repo.mysql.com/yum/mysql-5.7-community/el/$releasever/$basearch/
+recipes/Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,36,http_without_tls,ATTRIBUTE,baseurl,http://repo.mysql.com/yum/mysql-5.7-community/fc/$releasever/$basearch/
+recipes/aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,68,weak_crypto,FUNCTION,Digest::SHA1.file,
+recipes/aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,75,hardcoded_secret,ATTRIBUTE,user,root
+recipes/aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,93,suspicious_comment,COMMENT,,"TODO: Fix, so it works for upgrade"
+recipes/aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,101,hardcoded_secret,ATTRIBUTE,user,root
+recipes/aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,112,suspicious_comment,COMMENT,,"TODO: Fix, so it works for upgrade"
+recipes/chef-boneyard_qa-chef-server-cluster-attributes-default.rb,3,hardcoded_secret,ATTRIBUTE,private-key,-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA2lzwvnpTObhbhrzgiOaaoj04hsGi2PIvWqQeF6dk9wP9rpPQ\nmEqCpEwVNzoOAT4hgB5Vv
+recipes/chef-boneyard_qa-chef-server-cluster-attributes-default.rb,4,hardcoded_secret,ATTRIBUTE,public-key,ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDaXPC+elM5uFuGvOCI5pqiPTiGwaLY8i9apB4Xp2T3A/2uk9CYSoKkTBU3Og4BPiGAHlW+UYG9yE6R1X/h
+recipes/cookbooks_ic-ganglia-cookbooks-elasticsearch-recipes-plugins.rb,30,hardcoded_secret,ATTRIBUTE,user,root
+recipes/cookbooks_ic-ganglia-cookbooks-hadoop_cluster-example-clusters-science.rb,10,suspicious_comment,COMMENT,,your cluster and not have to wait later for nodes to decommission. Obviously
+recipes/cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb,129,weak_crypto,FUNCTION,Digest::MD5.hexdigest,
+recipes/cookbooks_ic-nodejs-cookbooks-hbase-recipes-config_files.rb,49,suspicious_comment,COMMENT,,"FIXME: this is brittle, but the best I can do. can you do better?"
+recipes/cookbooks_ic-package_set-cookbooks-rvm-providers-global_gem.rb,91,hardcoded_secret,ATTRIBUTE,user,root
+recipes/cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,20,hardcoded_secret,ATTRIBUTE,user,zabbix
+recipes/cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,34,hardcoded_secret,ATTRIBUTE,root_user,root
+recipes/cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,36,hardcoded_secret,ATTRIBUTE,user,zabbix
+recipes/cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,51,hardcoded_secret,ATTRIBUTE,username,chef
+recipes/cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,52,hardcoded_secret,ATTRIBUTE,password,fixme
+recipes/cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,53,hardcoded_secret,ATTRIBUTE,user_group,chefs
+recipes/cookbooks_ic-volumes-cookbooks-strongswan-recipes-routing.rb,22,suspicious_comment,COMMENT,,"FIXME: This is actually a whole separate concern from StrongSwan, and"
+recipes/cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,10,hardcoded_secret,ATTRIBUTE,user,www-data
+recipes/cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,11,hardcoded_secret,ATTRIBUTE,user,www-data
+recipes/cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,12,hardcoded_secret,ATTRIBUTE,user,www-data
+recipes/cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,19,invalid_bind,ATTRIBUTE,line_rcvr_addr,0.0.0.0
+recipes/cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,20,invalid_bind,ATTRIBUTE,pickle_rcvr_addr,0.0.0.0
+recipes/cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,21,invalid_bind,ATTRIBUTE,cache_query_addr,0.0.0.0
+recipes/cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,3,http_without_tls,ATTRIBUTE,source,http://fastdl.mongodb.org/linux/mongodb-linux-#{node[:kernel][:machine]}-#{mongodb[:version]}.tgz
+recipes/cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,29,invalid_bind,ATTRIBUTE,bind_ip,0.0.0.0
+recipes/cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,35,empty_password,ATTRIBUTE,password,
+recipes/cookbooks_ic-volumes_ebs-cookbooks-resque-attributes-default.rb,17,hardcoded_secret,ATTRIBUTE,user,resque
+recipes/cookbooks_ic-volumes_ebs-cookbooks-resque-attributes-default.rb,24,invalid_bind,ATTRIBUTE,addr,0.0.0.0
+recipes/cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb,28,invalid_bind,ATTRIBUTE,,0.0.0.0
+recipes/cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb,50,invalid_bind,ATTRIBUTE,,0.0.0.0
+recipes/danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb,39,hardcoded_secret,ATTRIBUTE,old_passwords,1
+recipes/desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb,96,hardcoded_secret,ATTRIBUTE,user,hdfs
+recipes/desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb,97,hardcoded_secret,ATTRIBUTE,user,hdfs
+recipes/desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb,102,hardcoded_secret,ATTRIBUTE,user,oozie
+recipes/desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb,108,hardcoded_secret,ATTRIBUTE,user,hdfs
+recipes/guymatz_chef-cookbooks-hive-attributes-default.rb,11,http_without_tls,ATTRIBUTE,url_pre,http://cdn.mysql.com/Downloads/Connector-J/mysql-connector-java-
+recipes/guymatz_chef-cookbooks-hive-attributes-default.rb,19,hardcoded_secret,ATTRIBUTE,db_user,hive
+recipes/guymatz_chef-cookbooks-mysql-attributes-client.rb,41,http_without_tls,ATTRIBUTE,url,http://www.mysql.com/get/Downloads/Connector-C/#{mysql['client']['package_file']}/from/http://mysql.mirrors.pair.com/
+recipes/guymatz_chef-cookbooks-python-attributes-default.rb,36,http_without_tls,ATTRIBUTE,url,http://www.python.org/ftp/python
+recipes/gwalbran_chef-cookbooks-imos_backup-attributes-restore.rb,10,hardcoded_secret,ATTRIBUTE,username,restore
+recipes/infochimps-labs_ironfan-pantry-cookbooks-python-attributes-default.rb,36,http_without_tls,ATTRIBUTE,url,http://www.python.org/ftp/python
+recipes/jonmthomson_cookbooks-mingw-recipes-default.rb,14,hardcoded_secret,ATTRIBUTE,password,vagrant
+recipes/kitchenplan_chef-applications-recipes-omnigraffle.rb,16,http_without_tls,ATTRIBUTE,source,http://media.konigi.com/tools/og-ux-template/Konigi-UX-Template-2-5-1.gtemplate.zip
+recipes/kitchenplan_chef-applications-recipes-omnigraffle.rb,41,http_without_tls,ATTRIBUTE,source,http://media.konigi.com/tools/og-ux-template/Konigi.gdiagramstyle.zip
+recipes/kitchenplan_chef-applications-recipes-omnigraffle.rb,66,http_without_tls,ATTRIBUTE,source,http://media.konigi.com/tools/og-wireframe-stencil/Konigi-Wireframe-Stencils-v3-02.zip
+recipes/kitchenware_master-chef-cookbooks-base-recipes-editor.rb,5,hardcoded_secret,ATTRIBUTE,user,root
+recipes/openstreetmap_chef-cookbooks-accounts-recipes-default.rb,37,hardcoded_secret,VARIABLE,user_shell,/usr/sbin/nologin
+recipes/openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,50,hardcoded_secret,ATTRIBUTE,database_user,civicrm
+recipes/openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,120,hardcoded_secret,ATTRIBUTE,user,wordpress
+recipes/openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,145,hardcoded_secret,ATTRIBUTE,user,wordpress
+recipes/openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,162,http_without_tls,ATTRIBUTE,,http://join.osmfoundation.org/
+recipes/openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,178,hardcoded_secret,ATTRIBUTE,user,www-data
+recipes/pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb,134,hardcoded_secret,ATTRIBUTE,user,root
+recipes/pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb,173,hardcoded_secret,ATTRIBUTE,user,root

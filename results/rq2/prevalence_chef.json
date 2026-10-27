@@ -1,0 +1,116 @@
+{
+ "tech": "chef",
+ "scripts": 70705,
+ "loc": 6061961,
+ "parser_errors": {},
+ "smells": {
+  "admin_by_default": {
+   "occurrences": 2565,
+   "density_per_kloc": 0.4231304028514865,
+   "script_pct": 2.128562336468425
+  },
+  "empty_password": {
+   "occurrences": 99,
+   "density_per_kloc": 0.016331348881987198,
+   "script_pct": 0.1230464606463475
+  },
+  "hardcoded_secret": {
+   "occurrences": 10719,
+   "density_per_kloc": 1.7682396834951593,
+   "script_pct": 6.756240718478184
+  },
+  "invalid_bind": {
+   "occurrences": 1270,
+   "density_per_kloc": 0.20950316242549233,
+   "script_pct": 0.8825401315324235
+  },
+  "suspicious_comment": {
+   "occurrences": 10634,
+   "density_per_kloc": 1.7542178182934531,
+   "script_pct": 8.132381019729863
+  },
+  "http_without_tls": {
+   "occurrences": 11653,
+   "density_per_kloc": 1.9223152375939072,
+   "script_pct": 5.4748603351955305
+  },
+  "weak_crypto": {
+   "occurrences": 409,
+   "density_per_kloc": 0.06746991608820974,
+   "script_pct": 0.3535817834665158
+  },
+  "tls_verify_disabled": {
+   "occurrences": 64,
+   "density_per_kloc": 0.010557639681284653,
+   "script_pct": 0.08061664663036561
+  }
+ },
+ "seven_sins_any_pct": 18.664875185630436,
+ "seven_sins_density": 6.1612075696296955,
+ "tls_top_patterns": [
+  [
+   "insecure",
+   20
+  ],
+  [
+   "--insecure-registry=#{i}",
+   10
+  ],
+  [
+   "ssl_verify",
+   10
+  ],
+  [
+   "verify_ssl",
+   5
+  ],
+  [
+   "sslverify",
+   4
+  ],
+  [
+   "expec",
+   2
+  ],
+  [
+   "curl -so /dev/null -k -c c.txt -b c.txt https://localhost/au",
+   2
+  ],
+  [
+   "curl -H \\'Referer:https://localhost/auth/login/\\' -k -c c.tx",
+   2
+  ],
+  [
+   "wget -q --no-check-certificate http://localhost",
+   2
+  ],
+  [
+   "with Config.ssl_verify = false",
+   1
+  ],
+  [
+   "before",
+   1
+  ],
+  [
+   "ssl_verify_host",
+   1
+  ],
+  [
+   "until (curl -XGET https://#{node['kibana']['yml']['server'][",
+   1
+  ],
+  [
+   "until (curl -XGET https://#{node['elastic']['yml']['network'",
+   1
+  ],
+  [
+   "command",
+   1
+  ],
+  [
+   "wget -q --no-check-certificate http://localhost:9080",
+   1
+  ]
+ ]
+}

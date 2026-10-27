@@ -1,0 +1,152 @@
+{
+ "tech": "ansible",
+ "scripts": 107955,
+ "loc": 5141663,
+ "parser_errors": {},
+ "smells": {
+  "admin_by_default": {
+   "occurrences": 10367,
+   "density_per_kloc": 2.016273723112542,
+   "script_pct": 5.672734009541013
+  },
+  "empty_password": {
+   "occurrences": 590,
+   "density_per_kloc": 0.11474886627147676,
+   "script_pct": 0.36126163679310824
+  },
+  "hardcoded_secret": {
+   "occurrences": 35145,
+   "density_per_kloc": 6.835337127306866,
+   "script_pct": 12.494094761706267
+  },
+  "invalid_bind": {
+   "occurrences": 2657,
+   "density_per_kloc": 0.5167588774293453,
+   "script_pct": 0.9976379046825066
+  },
+  "suspicious_comment": {
+   "occurrences": 5718,
+   "density_per_kloc": 1.1120915548140748,
+   "script_pct": 3.6135426798202954
+  },
+  "http_without_tls": {
+   "occurrences": 8184,
+   "density_per_kloc": 1.5917029179080777,
+   "script_pct": 3.771015700986522
+  },
+  "weak_crypto": {
+   "occurrences": 234,
+   "density_per_kloc": 0.045510567300890786,
+   "script_pct": 0.1963781205131768
+  },
+  "tls_verify_disabled": {
+   "occurrences": 2048,
+   "density_per_kloc": 0.39831470868471935,
+   "script_pct": 1.0078273354638507
+  }
+ },
+ "seven_sins_any_pct": 18.161270899912,
+ "seven_sins_density": 12.232423634143274,
+ "tls_top_patterns": [
+  [
+   "validate_certs",
+   1690
+  ],
+  [
+   "shell",
+   71
+  ],
+  [
+   "command",
+   65
+  ],
+  [
+   "insecure",
+   35
+  ],
+  [
+   "verify_ssl",
+   29
+  ],
+  [
+   "sslverify",
+   25
+  ],
+  [
+   "line",
+   18
+  ],
+  [
+   "insecure_skip_verify",
+   11
+  ],
+  [
+   "cmd",
+   10
+  ],
+  [
+   "ssl_verify",
+   8
+  ],
+  [
+   "lxdock shell $lxc -c curl -i -s --insecure --data \"user=ncad",
+   7
+  ],
+  [
+   "reg_flag",
+   6
+  ],
+  [
+   "regexp",
+   6
+  ],
+  [
+   "docker_options",
+   4
+  ],
+  [
+   "replace",
+   4
+  ],
+  [
+   "ignore-certs",
+   4
+  ],
+  [
+   "msg",
+   4
+  ],
+  [
+   ":script",
+   4
+  ],
+  [
+   "sudo -E su $USER -c \"env PATH=$PATH kitchen exec ${suite}-${",
+   3
+  ],
+  [
+   "run",
+   3
+  ],
+  [
+   "if [[ ! -f /tmp/webconsole-config.hash ]]; then \\ md5sum /va",
+   3
+  ],
+  [
+   "lineinfile",
+   3
+  ],
+  [
+   "cron",
+   2
+  ],
+  [
+   "run_operator_image_builder.sh",
+   2
+  ],
+  [
+   "insecure-skip-tls-verify",
+   2
+  ]
+ ]
+}

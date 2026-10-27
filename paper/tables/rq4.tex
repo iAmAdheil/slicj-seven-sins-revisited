@@ -1,0 +1,17 @@
+\begin{table}[t]\centering\caption{RQ4: flip rate (true findings that the model drops after a misleading comment is inserted) with comments visible / removed from the state.}\label{tab:rq4}
+\scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{llcc}\toprule
+Model & Attack (position) & Visible & Removed \\ \midrule
+Claude Haiku 5.5 ($n$=59) & placeholder (above) & 16.4\% (9) & 0.0\% (0) \\
+ & placeholder (inline) & 20.0\% (11) & 0.0\% (0) \\
+ & approval (above) & 1.8\% (1) & 0.0\% (0) \\
+ & approval (inline) & 1.8\% (1) & 0.0\% (0) \\
+ & injection (above) & 0.0\% (0) & 0.0\% (0) \\
+ & injection (inline) & 0.0\% (0) & 0.0\% (0) \\
+\midrule
+Mercury-Decide ($n$=132) & placeholder (above) & 26.2\% (32) & 1.6\% (2) \\
+ & placeholder (inline) & 1.6\% (2) & 0.0\% (0) \\
+ & approval (above) & 1.6\% (2) & 1.6\% (2) \\
+ & approval (inline) & 1.6\% (2) & 0.0\% (0) \\
+ & injection (above) & 97.5\% (119) & 1.6\% (2) \\
+ & injection (inline) & 22.1\% (27) & 0.0\% (0) \\
+\bottomrule\end{tabular}\end{table}

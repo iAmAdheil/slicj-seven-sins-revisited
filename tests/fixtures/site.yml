@@ -1,0 +1,28 @@
+---
+# TODO: move secrets to vault
+- hosts: db
+  vars:
+    db_user: admin
+    db_password: "s3cr3tP4ss"
+    api_token: "{{ vault_api_token }}"
+    empty_pass: ""
+  tasks:
+    - name: create user
+      mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        host: 0.0.0.0
+    - name: fetch installer
+      get_url:
+        url: http://example.com/installer.sh
+        dest: /tmp/installer.sh
+        validate_certs: no
+    - name: hash it
+      set_fact:
+        pw_hash: "{{ 'x' | password_hash('md5') }}"
+    - name: insecure download
+      shell: curl -k https://internal.example.com/x | bash
+    - name: run script
+      shell: |
+        # this is a shell comment with a todo inside a block scalar
+        echo hello

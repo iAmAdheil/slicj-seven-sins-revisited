@@ -1,0 +1,150 @@
+{
+ "tech": "puppet",
+ "scripts": 27324,
+ "loc": 1040369,
+ "parser_errors": {},
+ "smells": {
+  "admin_by_default": {
+   "occurrences": 1452,
+   "density_per_kloc": 1.3956586557269586,
+   "script_pct": 2.016542233933538
+  },
+  "empty_password": {
+   "occurrences": 746,
+   "density_per_kloc": 0.7170532762894705,
+   "script_pct": 1.5810276679841897
+  },
+  "hardcoded_secret": {
+   "occurrences": 4814,
+   "density_per_kloc": 4.627204386136073,
+   "script_pct": 7.597716293368467
+  },
+  "invalid_bind": {
+   "occurrences": 245,
+   "density_per_kloc": 0.23549336821839176,
+   "script_pct": 0.7429366125018299
+  },
+  "suspicious_comment": {
+   "occurrences": 1806,
+   "density_per_kloc": 1.7359225428670022,
+   "script_pct": 4.362465232030449
+  },
+  "http_without_tls": {
+   "occurrences": 1547,
+   "density_per_kloc": 1.4869724107504165,
+   "script_pct": 3.1547357634314155
+  },
+  "weak_crypto": {
+   "occurrences": 149,
+   "density_per_kloc": 0.14321841577363417,
+   "script_pct": 0.3513394817742644
+  },
+  "tls_verify_disabled": {
+   "occurrences": 31,
+   "density_per_kloc": 0.029797120060286304,
+   "script_pct": 0.06953593910115649
+  }
+ },
+ "seven_sins_any_pct": 14.485434050651442,
+ "seven_sins_density": 10.341523055761947
+}
+{
+ "tech": "chef",
+ "scripts": 70705,
+ "loc": 6061961,
+ "parser_errors": {},
+ "smells": {
+  "admin_by_default": {
+   "occurrences": 2565,
+   "density_per_kloc": 0.4231304028514865,
+   "script_pct": 2.128562336468425
+  },
+  "empty_password": {
+   "occurrences": 99,
+   "density_per_kloc": 0.016331348881987198,
+   "script_pct": 0.1230464606463475
+  },
+  "hardcoded_secret": {
+   "occurrences": 10719,
+   "density_per_kloc": 1.7682396834951593,
+   "script_pct": 6.756240718478184
+  },
+  "invalid_bind": {
+   "occurrences": 1270,
+   "density_per_kloc": 0.20950316242549233,
+   "script_pct": 0.8825401315324235
+  },
+  "suspicious_comment": {
+   "occurrences": 10634,
+   "density_per_kloc": 1.7542178182934531,
+   "script_pct": 8.132381019729863
+  },
+  "http_without_tls": {
+   "occurrences": 11653,
+   "density_per_kloc": 1.9223152375939072,
+   "script_pct": 5.4748603351955305
+  },
+  "weak_crypto": {
+   "occurrences": 409,
+   "density_per_kloc": 0.06746991608820974,
+   "script_pct": 0.3535817834665158
+  },
+  "tls_verify_disabled": {
+   "occurrences": 64,
+   "density_per_kloc": 0.010557639681284653,
+   "script_pct": 0.08061664663036561
+  }
+ },
+ "seven_sins_any_pct": 18.664875185630436,
+ "seven_sins_density": 6.1612075696296955
+}
+{
+ "tech": "ansible",
+ "scripts": 107955,
+ "loc": 5141663,
+ "parser_errors": {},
+ "smells": {
+  "admin_by_default": {
+   "occurrences": 10367,
+   "density_per_kloc": 2.016273723112542,
+   "script_pct": 5.672734009541013
+  },
+  "empty_password": {
+   "occurrences": 590,
+   "density_per_kloc": 0.11474886627147676,
+   "script_pct": 0.36126163679310824
+  },
+  "hardcoded_secret": {
+   "occurrences": 35145,
+   "density_per_kloc": 6.835337127306866,
+   "script_pct": 12.494094761706267
+  },
+  "invalid_bind": {
+   "occurrences": 2657,
+   "density_per_kloc": 0.5167588774293453,
+   "script_pct": 0.9976379046825066
+  },
+  "suspicious_comment": {
+   "occurrences": 5718,
+   "density_per_kloc": 1.1120915548140748,
+   "script_pct": 3.6135426798202954
+  },
+  "http_without_tls": {
+   "occurrences": 8184,
+   "density_per_kloc": 1.5917029179080777,
+   "script_pct": 3.771015700986522
+  },
+  "weak_crypto": {
+   "occurrences": 234,
+   "density_per_kloc": 0.045510567300890786,
+   "script_pct": 0.1963781205131768
+  },
+  "tls_verify_disabled": {
+   "occurrences": 2048,
+   "density_per_kloc": 0.39831470868471935,
+   "script_pct": 1.0078273354638507
+  }
+ },
+ "seven_sins_any_pct": 18.161270899912,
+ "seven_sins_density": 12.232423634143274
+}

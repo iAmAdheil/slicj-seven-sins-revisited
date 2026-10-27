@@ -1,0 +1,25 @@
+\begin{table*}[t]\centering\caption{RQ3: triage of the 269 SLIC-J candidates (151 TP, 118 FP; 176 oracle smells). Mean $\pm$ s.d.\ over 10 seeds of grouped 5-fold CV (threshold tuned in-fold). Recall counts all oracle smells, so the rules' ceiling is 0.858. AUC, Brier and ECE use the raw scores; cost is USD per 1{,}000 findings; latency is the median per call.}\label{tab:rq3}
+\scriptsize\setlength{\tabcolsep}{4pt}\begin{tabular}{llcccccccc}\toprule
+Type & Method & Precision & Recall & F1 & F1 @0.5 & AUC & ECE & \$/1k & Lat.\,(s) \\ \midrule
+Rules & SLIC-J rules only & 0.561$\pm$0.000 & 0.858$\pm$0.000 & 0.679$\pm$0.000 & -- & -- & -- & 0 & -- \\
+Rules & Practitioner-context filter & 0.562$\pm$0.000 & 0.744$\pm$0.000 & 0.641$\pm$0.000 & -- & -- & -- & 0 & -- \\
+\midrule
+Learned & LogReg (context features) & 0.747$\pm$0.008 & 0.721$\pm$0.018 & 0.734$\pm$0.008 & 0.716 & 0.843 & 0.107 & 0 & -- \\
+\midrule
+Decision model & Jev 1.13, line only & 0.761$\pm$0.013 & 0.782$\pm$0.009 & 0.771$\pm$0.009 & 0.775 & 0.826 & 0.099 & 0.023 & 0.59 \\
+Decision model & \textbf{Jev 1.13, full context} & 0.782$\pm$0.010 & 0.812$\pm$0.006 & 0.797$\pm$0.006 & 0.766 & 0.808 & 0.152 & 0.035 & 0.57 \\
+Decision model & Jev 1.13, full, no comments & 0.785$\pm$0.009 & 0.811$\pm$0.009 & 0.797$\pm$0.007 & 0.768 & 0.816 & 0.140 & 0.035 & 0.57 \\
+Decision model & Jev 1.14, full context & 0.774$\pm$0.005 & 0.798$\pm$0.011 & 0.786$\pm$0.007 & 0.796 & 0.795 & 0.180 & 0.035 & 0.66 \\
+Decision model & GPT-6 Luna Decisions & 0.787$\pm$0.004 & 0.812$\pm$0.000 & 0.799$\pm$0.002 & 0.719 & 0.851 & 0.159 & 0.060 & 0.76 \\
+Decision model & Liquid d1-ultra & 0.813$\pm$0.002 & 0.783$\pm$0.003 & 0.797$\pm$0.002 & 0.742 & 0.865 & 0.192 & 0.024 & 0.81 \\
+Decision model & Perplexity Decider v1.2 & 0.799$\pm$0.004 & 0.787$\pm$0.012 & 0.793$\pm$0.005 & 0.784 & 0.865 & 0.143 & 0.011 & 0.74 \\
+Decision model & Inception Mercury-Decide & 0.750$\pm$0.006 & 0.806$\pm$0.004 & 0.777$\pm$0.004 & 0.752 & 0.856 & 0.185 & 0.011 & 0.79 \\
+Decision model & Cloudflare Clef & 0.776$\pm$0.011 & 0.732$\pm$0.003 & 0.753$\pm$0.005 & 0.753 & 0.850 & 0.070 & 0.028 & 0.79 \\
+Decision model & Microsoft Decision-1 & 0.582$\pm$0.006 & 0.773$\pm$0.031 & 0.664$\pm$0.015 & 0.637 & 0.664 & 0.176 & 0.020 & 0.76 \\
+Decision model & Upstage Solar-Decide & 0.624$\pm$0.013 & 0.784$\pm$0.002 & 0.694$\pm$0.008 & 0.697 & 0.511 & 0.307 & 0.042 & 1.89 \\
+\midrule
+Chat LLM & Claude Haiku 5.5 (chat LLM) & 0.785$\pm$0.005 & 0.839$\pm$0.008 & 0.811$\pm$0.005 & 0.644 & 0.843 & 0.178 & 0.143 & 1.78 \\
+Chat LLM & Claude Haiku 5.5 via CLI (RQ4 arm) & 0.814$\pm$0.006 & 0.805$\pm$0.006 & 0.809$\pm$0.005 & 0.641 & 0.834 & 0.214 & -- & -- \\
+\midrule
+Hybrid & Hybrid: LogReg + Jev full & 0.833$\pm$0.013 & 0.702$\pm$0.008 & 0.762$\pm$0.006 & 0.759 & 0.875 & 0.073 & -- & -- \\
+\bottomrule\end{tabular}\end{table*}

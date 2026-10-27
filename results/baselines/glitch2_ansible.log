@@ -1,0 +1,62 @@
+ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:   0%|          | 0/81 [00:00<?, ?it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:   4%|▎         | 3/81 [00:00<00:03, 23.60it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:   7%|▋         | 6/81 [00:00<00:03, 22.12it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  11%|█         | 9/81 [00:00<00:03, 19.27it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  14%|█▎        | 11/81 [00:00<00:05, 13.51it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  16%|█▌        | 13/81 [00:00<00:05, 12.45it/s]Error: Ansible - Cannot detect file type: data/glitch_rootfs/RESULTS/ansible/oracle-dataset/tripleo-quickstart-roles-virtbmc-defaults-main.yml
+==================== Traceback ====================
+NoneType: None
+
+===================================================
+Error: Ansible - File is not a variables file: data/glitch_rootfs/RESULTS/ansible/oracle-dataset/ansible-role-container-registry-vars-main.yml
+==================== Traceback ====================
+Traceback (most recent call last):
+  File "/Users/abhishekgupta/cloud-SRE/tools/glitch-venv/lib/python3.12/site-packages/glitch/parsers/ansible.py", line 301, in __parse_vars_file
+    vars = self.__parse_vars(parsed_file, code)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/abhishekgupta/cloud-SRE/tools/glitch-venv/lib/python3.12/site-packages/glitch/parsers/ansible.py", line 102, in __parse_vars
+    value = self.get_value(val, code)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/abhishekgupta/cloud-SRE/tools/glitch-venv/lib/python3.12/site-packages/glitch/parsers/yaml.py", line 422, in get_value
+    return self.__parse_string("".join(content), info)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/abhishekgupta/cloud-SRE/tools/glitch-venv/lib/python3.12/site-packages/glitch/parsers/yaml.py", line 396, in __parse_string
+    raise ValueError("No Jinja nodes found")
+ValueError: No Jinja nodes found
+
+===================================================
+ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  21%|██        | 17/81 [00:01<00:03, 17.61it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  25%|██▍       | 20/81 [00:01<00:03, 19.10it/s]Error: Ansible - Cannot detect file type: data/glitch_rootfs/RESULTS/ansible/oracle-dataset/bifrost-playbooks-roles-bifrost-test-dhcp-defaults-main.yml
+==================== Traceback ====================
+NoneType: None
+
+===================================================
+ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  28%|██▊       | 23/81 [00:01<00:02, 20.34it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  32%|███▏      | 26/81 [00:01<00:04, 12.34it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  35%|███▍      | 28/81 [00:02<00:05, 10.32it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  37%|███▋      | 30/81 [00:02<00:05,  9.70it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  41%|████      | 33/81 [00:02<00:03, 12.40it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  43%|████▎     | 35/81 [00:05<00:21,  2.16it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  47%|████▋     | 38/81 [00:05<00:13,  3.13it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  49%|████▉     | 40/81 [00:06<00:11,  3.63it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  52%|█████▏    | 42/81 [00:06<00:09,  4.25it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  56%|█████▌    | 45/81 [00:06<00:06,  5.50it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  60%|██████    | 49/81 [00:06<00:04,  7.55it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  65%|██████▌   | 53/81 [00:06<00:02, 10.57it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  69%|██████▉   | 56/81 [00:07<00:01, 12.57it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  73%|███████▎  | 59/81 [00:07<00:01, 13.75it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  75%|███████▌  | 61/81 [00:07<00:01, 14.72it/s]Error: Ansible - Cannot detect file type: data/glitch_rootfs/RESULTS/ansible/oracle-dataset/bifrost-playbooks-roles-bifrost-test-inspection-handlers-main.yml
+==================== Traceback ====================
+NoneType: None
+
+===================================================
+ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  81%|████████▏ | 66/81 [00:07<00:00, 15.92it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  84%|████████▍ | 68/81 [00:07<00:00, 15.29it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  86%|████████▋ | 70/81 [00:08<00:01,  6.34it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  89%|████████▉ | 72/81 [00:09<00:01,  5.09it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  93%|█████████▎| 75/81 [00:09<00:01,  5.78it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  94%|█████████▍| 76/81 [00:09<00:00,  6.02it/s]ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']:  96%|█████████▋| 78/81 [00:10<00:00,  6.31it/s]Error: Ansible - Cannot detect file type: data/glitch_rootfs/RESULTS/ansible/oracle-dataset/bifrost-playbooks-roles-bifrost-test-vm-handlers-main.yml
+==================== Traceback ====================
+NoneType: None
+
+===================================================
+ANALYZING ALL FILES WITH EXTENSIONS ['yml', 'yaml']: 100%|██████████| 81/81 [00:10<00:00,  7.94it/s]
++-------------------------------------+-------------+----------------------------+---------------------------+
+|                               Smell | Occurrences | Smell density (Smell/KLoC) | Proportion of scripts (%) |
++-------------------------------------+-------------+----------------------------+---------------------------+
+|                    Admin by default | 7           | 1.68                       | 7.89                      |
+|                      Empty password | 1           | 0.24                       | 1.32                      |
+|   Full permission to the filesystem | 0           | 0.0                        | 0.0                       |
+|                 Hard-coded password | 4           | 0.96                       | 2.63                      |
+|                   Hard-coded secret | 3           | 0.72                       | 3.95                      |
+|                     Hard-coded user | 11          | 2.64                       | 10.53                     |
+|          Invalid IP address binding | 1           | 0.24                       | 1.32                      |
+|      Missing default case statement | 0           | 0.0                        | 0.0                       |
+|                  No integrity check | 1           | 0.24                       | 1.32                      |
+|                  Suspicious comment | 8           | 1.92                       | 5.26                      |
+|             Use of HTTP without TLS | 21          | 5.03                       | 2.63                      |
+| Use of obsolete command or function | 0           | 0.0                        | 0.0                       |
+|               Weak Crypto Algorithm | 1           | 0.24                       | 1.32                      |
+| ----------------------------------- | ----------- | -------------------------- | ------------------------- |
+|                            Combined | 58          | 13.910000000000004         | 21.05                     |
++-------------------------------------+-------------+----------------------------+---------------------------+
++-----------------+---------------+
+| Total IaC files | Lines of Code |
++-----------------+---------------+
+|        76       |      4171     |
++-----------------+---------------+

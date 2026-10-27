@@ -1,0 +1,79 @@
+FILE,LINE,SMELL,TOKEN,NAME,VALUE
+Automattic@vip-quickstart-puppet-manifests-sections-mail.pp,7,hardcoded_secret,ATTRIBUTE,user,root
+Juniper@contrail-puppet-contrail-environment-modules-contrail-manifests-collector-config.pp,74,invalid_bind,ATTRIBUTE,value,0.0.0.0
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp,32,hardcoded_secret,ATTRIBUTE,user,root
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp,42,hardcoded_secret,ATTRIBUTE,user,root
+SecGen@SecGen-modules-services-unix-http-tomcat-manifests-instance-dependencies.pp,6,weak_crypto,FUNCTION,sha1,
+SecGen@SecGen-modules-services-unix-http-tomcat-manifests-instance-dependencies.pp,7,weak_crypto,FUNCTION,sha1,
+SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp,111,invalid_bind,VARIABLE,$firewall_src,0.0.0.0/0
+SecGen@SecGen-modules-utilities-unix-firewall-firewall-manifests-linux-redhat.pp,23,suspicious_comment,COMMENT,,RHEL 7 and later and Fedora 15 and later require the iptables-services
+SecGen@SecGen-modules-utilities-unix-firewall-firewall-manifests-linux-redhat.pp,67,hardcoded_secret,VARIABLE,$seluser,unconfined_u
+SecGen@SecGen-modules-utilities-unix-firewall-firewall-manifests-linux-redhat.pp,68,hardcoded_secret,VARIABLE,$seluser,system_u
+SecGen@SecGen-modules-vulnerabilities-unix-access_control_misconfigurations-uid_less_root-uid_less_root.pp,2,hardcoded_secret,ATTRIBUTE,user,root
+SecGen@SecGen-modules-vulnerabilities-unix-access_control_misconfigurations-uid_less_root-uid_less_root.pp,5,hardcoded_secret,ATTRIBUTE,/usr/bin/less,4777
+alphagov@govuk-puppet-modules-govuk-manifests-node-s_calculators_frontend.pp,1,suspicious_comment,COMMENT,,FIXME: This class needs better documentation as per https://docs.puppetlabs.com/guides/style_guide.html#puppet-doc
+alphagov@govuk-puppet-modules-govuk-manifests-node-s_calculators_frontend.pp,29,invalid_bind,ATTRIBUTE,listen_ip,0.0.0.0
+alphagov@govuk-puppet-modules-govuk_beat-manifests-repo.pp,16,http_without_tls,ATTRIBUTE,location,http://${apt_mirror_hostname}/elastic-beats
+alphagov@govuk-puppet-modules-govuk_elasticsearch-manifests-dump.pp,1,suspicious_comment,COMMENT,,FIXME: This class needs better documentation as per https://docs.puppetlabs.com/guides/style_guide.html#puppet-doc
+alphagov@govuk-puppet-modules-govuk_elasticsearch-manifests-dump.pp,30,http_without_tls,ATTRIBUTE,command,/usr/bin/es_dump http://localhost:9200 /var/es_dump
+alphagov@govuk-puppet-modules-govuk_elasticsearch-manifests-dump.pp,31,hardcoded_secret,ATTRIBUTE,user,elasticsearch
+alphagov@govuk-puppet-modules-govuk_mysql-manifests-server.pp,84,invalid_bind,ATTRIBUTE,bind-address,0.0.0.0
+alphagov@govuk-puppet-modules-govuk_postgresql-manifests-env_sync_user.pp,22,hardcoded_secret,ATTRIBUTE,user,env-sync
+alphagov@govuk-puppet-modules-govuk_rabbitmq-manifests-monitoring.pp,1,suspicious_comment,COMMENT,,FIXME: This class needs better documentation as per https://docs.puppetlabs.com/guides/style_guide.html#puppet-doc
+alphagov@govuk-puppet-modules-govuk_rbenv-manifests-all.pp,18,http_without_tls,ATTRIBUTE,location,http://${apt_mirror_hostname}/rbenv-ruby
+alphagov@govuk-puppet-modules-icinga-manifests-init.pp,1,suspicious_comment,COMMENT,,FIXME: This class needs better documentation as per https://docs.puppetlabs.com/guides/style_guide.html#puppet-doc
+boxbilling@boxbilling-puphpet-puppet-modules-yum-manifests-repo-jpackage6.pp,9,http_without_tls,ATTRIBUTE,mirrorlist,http://www.jpackage.org/mirrorlist.php?dist=generic&type=free&release=6.0
+boxbilling@boxbilling-puphpet-puppet-modules-yum-manifests-repo-jpackage6.pp,12,http_without_tls,ATTRIBUTE,gpgkey,http://www.jpackage.org/jpackage.asc
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,21,hardcoded_secret,ATTRIBUTE,user,root
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,26,hardcoded_secret,ATTRIBUTE,user,root
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,33,hardcoded_secret,ATTRIBUTE,user,root
+cargomedia@puppet-packages-modules-mysql-manifests-server-instance.pp,1,empty_password,PARAMETER,$root_password,
+cargomedia@puppet-packages-modules-mysql-manifests-server-instance.pp,1,empty_password,PARAMETER,$debian_sys_maint_password,
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp,9,hardcoded_secret,ATTRIBUTE,root_password,strongpassword
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp,13,hardcoded_secret,ATTRIBUTE,user,bitbucket
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp,14,hardcoded_secret,ATTRIBUTE,password,password
+hubspotdevops@puppet-nexus-manifests-params.pp,28,http_without_tls,VARIABLE,$download_site,http://download.sonatype.com/nexus/oss
+hubspotdevops@puppet-nexus-manifests-params.pp,34,hardcoded_secret,VARIABLE,$nexus_user,nexus
+hubspotdevops@puppet-nexus-manifests-params.pp,36,invalid_bind,VARIABLE,$nexus_host,0.0.0.0
+hubspotdevops@puppet-nexus-manifests-params.pp,40,http_without_tls,VARIABLE,$pro_download_site,http://download.sonatype.com/nexus/professional-bundle
+mattheath@puppet-php-manifests-version.pp,102,hardcoded_secret,ATTRIBUTE,user_home,/Users/${::boxen_user}
+openstack@fuel-library-deployment-puppet-osnailyfacter-manifests-ssh.pp,39,hardcoded_secret,PARAMETER,$password_auth,no
+openstack@puppet-neutron-manifests-params.pp,45,hardcoded_secret,VARIABLE,$nobody_user_group,nobody
+openstack@puppet-neutron-manifests-params.pp,95,hardcoded_secret,VARIABLE,$nobody_user_group,nogroup
+openstack@puppet-neutron-manifests-server-placement.pp,71,hardcoded_secret,PARAMETER,$username,nova
+openstack@puppet-neutron-manifests-server-placement.pp,75,hardcoded_secret,PARAMETER,$user_domain_id,default
+openstack@puppet-neutron-manifests-server-placement.pp,76,hardcoded_secret,PARAMETER,$user_domain_name,Default
+openstack@puppet-neutron-manifests-server-placement.pp,77,http_without_tls,PARAMETER,$auth_url,http://127.0.0.1:5000
+openstack@puppet-openstack-integration-manifests-designate.pp,11,hardcoded_secret,ATTRIBUTE,password,an_even_bigger_secret
+openstack@puppet-openstack-integration-manifests-designate.pp,16,hardcoded_secret,ATTRIBUTE,password,designate
+openstack@puppet-openstack-integration-manifests-designate.pp,26,hardcoded_secret,ATTRIBUTE,username,designate
+openstack@puppet-openstack-integration-manifests-designate.pp,27,hardcoded_secret,ATTRIBUTE,password,an_even_bigger_secret
+openstack@puppet-openstack-integration-manifests-designate.pp,37,suspicious_comment,COMMENT,,TODO: Support SSL
+openstack@puppet-openstack-integration-manifests-designate.pp,39,hardcoded_secret,ATTRIBUTE,password,a_big_secret
+openstack@puppet-openstack-integration-manifests-designate.pp,40,http_without_tls,ATTRIBUTE,public_url,http://${::openstack_integration::config::ip_for_url}:9001
+openstack@puppet-openstack-integration-manifests-designate.pp,41,http_without_tls,ATTRIBUTE,internal_url,http://${::openstack_integration::config::ip_for_url}:9001
+openstack@puppet-openstack-integration-manifests-designate.pp,42,http_without_tls,ATTRIBUTE,admin_url,http://${::openstack_integration::config::ip_for_url}:9001
+openstack@puppet-openstack-integration-manifests-designate.pp,45,hardcoded_secret,ATTRIBUTE,password,a_big_secret
+openstack@puppet-openstack-integration-manifests-designate.pp,46,hardcoded_secret,ATTRIBUTE,user_domain_name,Default
+openstack@puppet-openstack-integration-manifests-designate.pp,55,http_without_tls,ATTRIBUTE,api_base_uri,http://${::openstack_integration::config::ip_for_url}:9001
+openstack@puppet-openstack-integration-manifests-designate.pp,61,suspicious_comment,COMMENT,,IPv6 doesn't work for mdns ? https://bugs.launchpad.net/designate/+bug/1501396
+openstack@puppet-openstack-integration-manifests-designate.pp,100,suspicious_comment,COMMENT,,TODO: Implement pools.yaml management in puppet-designate
+openstack@puppet-tripleo-manifests-profile-base-aide-installdb.pp,36,hardcoded_secret,ATTRIBUTE,user,root
+openstack@puppet-tripleo-manifests-profile-base-aide-installdb.pp,44,hardcoded_secret,ATTRIBUTE,user,root
+poetic@our-boxen-manifests-site.pp,44,hardcoded_secret,ATTRIBUTE,credential.helper,${boxen::config::bindir}/boxen-git-credential
+puphpet@puppet-puphpet-manifests-nginx-params.pp,5,hardcoded_secret,VARIABLE,$webroot_user,www-data
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,13,hardcoded_secret,PARAMETER,$ssl_pass_phrase_dialog,builtin
+purpleidea@puppet-gluster-manifests-simple.pp,8,suspicious_comment,COMMENT,,(at your option) any later version.
+purpleidea@puppet-gluster-manifests-simple.pp,22,suspicious_comment,COMMENT,,TODO: not fully implemented in puppet-gluster
+purpleidea@puppet-gluster-manifests-simple.pp,26,empty_password,PARAMETER,$password,
+purpleidea@puppet-gluster-manifests-simple.pp,81,suspicious_comment,COMMENT,,TODO: check that each element of array is a valid hash!
+purpleidea@puppet-gluster-manifests-simple.pp,145,suspicious_comment,COMMENT,,TODO: should we use the same pattern for 1 or many ?
+quintel@boxen-modules-osx-manifests-recovery_message.pp,22,hardcoded_secret,ATTRIBUTE,user,root
+quintel@boxen-modules-osx-manifests-recovery_message.pp,29,hardcoded_secret,ATTRIBUTE,user,root
+quintel@boxen-modules-osx-manifests-recovery_message.pp,48,hardcoded_secret,ATTRIBUTE,user,root
+quintel@boxen-modules-osx-manifests-recovery_message.pp,67,hardcoded_secret,ATTRIBUTE,user,root
+redhat-openstack@puppet-galera-manifests-server.pp,98,admin_by_default,PARAMETER,$wsrep_sst_username,root
+redhat-openstack@puppet-galera-manifests-server.pp,98,hardcoded_secret,PARAMETER,$wsrep_sst_username,root
+redhat-openstack@puppet-galera-manifests-server.pp,106,invalid_bind,PARAMETER,$wsrep_bind_address,0.0.0.0
+voxpupuli@puppet-rabbitmq-examples-permissions-add.pp,2,hardcoded_secret,ATTRIBUTE,password,foo
+voxpupuli@puppet-rundeck-manifests-config-global-framework.pp,28,http_without_tls,ATTRIBUTE,framework.server.url,http://${rundeck_hostname}:${rundeck_port}

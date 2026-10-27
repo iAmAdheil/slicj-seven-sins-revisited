@@ -1,0 +1,84 @@
+{
+ "tech": "puppet",
+ "scripts": 27324,
+ "loc": 1040369,
+ "parser_errors": {},
+ "smells": {
+  "admin_by_default": {
+   "occurrences": 1452,
+   "density_per_kloc": 1.3956586557269586,
+   "script_pct": 2.016542233933538
+  },
+  "empty_password": {
+   "occurrences": 746,
+   "density_per_kloc": 0.7170532762894705,
+   "script_pct": 1.5810276679841897
+  },
+  "hardcoded_secret": {
+   "occurrences": 4814,
+   "density_per_kloc": 4.627204386136073,
+   "script_pct": 7.597716293368467
+  },
+  "invalid_bind": {
+   "occurrences": 245,
+   "density_per_kloc": 0.23549336821839176,
+   "script_pct": 0.7429366125018299
+  },
+  "suspicious_comment": {
+   "occurrences": 1806,
+   "density_per_kloc": 1.7359225428670022,
+   "script_pct": 4.362465232030449
+  },
+  "http_without_tls": {
+   "occurrences": 1547,
+   "density_per_kloc": 1.4869724107504165,
+   "script_pct": 3.1547357634314155
+  },
+  "weak_crypto": {
+   "occurrences": 149,
+   "density_per_kloc": 0.14321841577363417,
+   "script_pct": 0.3513394817742644
+  },
+  "tls_verify_disabled": {
+   "occurrences": 31,
+   "density_per_kloc": 0.029797120060286304,
+   "script_pct": 0.06953593910115649
+  }
+ },
+ "seven_sins_any_pct": 14.485434050651442,
+ "seven_sins_density": 10.341523055761947,
+ "tls_top_patterns": [
+  [
+   "command",
+   18
+  ],
+  [
+   "insecure",
+   3
+  ],
+  [
+   "$curl_post",
+   2
+  ],
+  [
+   "$curl_get",
+   2
+  ],
+  [
+   "extra_parameters",
+   2
+  ],
+  [
+   "$insecure",
+   2
+  ],
+  [
+   "insecure_skip_verify",
+   1
+  ],
+  [
+   "allow_insecure",
+   1
+  ]
+ ]
+}

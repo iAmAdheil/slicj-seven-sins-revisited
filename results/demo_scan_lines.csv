@@ -1,0 +1,19 @@
+FILE,LINE,SMELL,TOKEN,NAME,VALUE
+fig4.pp,1,suspicious_comment,COMMENT,,addresses bug: https://bugs.launchpad.net/keystone/+bug/1472285
+fig4.pp,3,admin_by_default,PARAMETER,$power_username,admin
+fig4.pp,3,hardcoded_secret,PARAMETER,$power_username,admin
+fig4.pp,4,hardcoded_secret,PARAMETER,$power_password,admin
+fig4.pp,7,invalid_bind,VARIABLE,$bind_host,0.0.0.0
+fig4.pp,9,http_without_tls,VARIABLE,$quantum_auth_url,http://127.0.0.1:35357/v2.0
+fig4.pp,20,empty_password,ATTRIBUTE,password,
+fig4.pp,26,weak_crypto,FUNCTION,ht_md5,
+site.yml,2,suspicious_comment,COMMENT,,TODO: move secrets to vault
+site.yml,5,admin_by_default,VARIABLE,db_user,admin
+site.yml,5,hardcoded_secret,VARIABLE,db_user,admin
+site.yml,6,hardcoded_secret,VARIABLE,db_password,s3cr3tP4ss
+site.yml,8,empty_password,VARIABLE,empty_pass,
+site.yml,14,invalid_bind,ATTRIBUTE,host,0.0.0.0
+site.yml,17,http_without_tls,ATTRIBUTE,url,http://example.com/installer.sh
+site.yml,19,tls_verify_disabled,ATTRIBUTE,validate_certs,false
+site.yml,22,weak_crypto,FUNCTION,password_hash,
+site.yml,24,tls_verify_disabled,ATTRIBUTE,shell,curl -k https://internal.example.com/x | bash
