@@ -2279,6 +2279,93 @@
    "recall": 1.0
   }
  },
+ "chef|all|SLAC (original)": {
+  "admin_by_default": {
+   "tp": 0,
+   "fp": 1,
+   "fn": 37,
+   "support": 37,
+   "precision": 0.0,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "empty_password": {
+   "tp": 0,
+   "fp": 6,
+   "fn": 4,
+   "support": 4,
+   "precision": 0.0,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "hardcoded_secret": {
+   "tp": 7,
+   "fp": 47,
+   "fn": 6,
+   "support": 13,
+   "precision": 0.12962962962962962,
+   "recall": 0.5384615384615384,
+   "f1": 0.208955223880597
+  },
+  "invalid_bind": {
+   "tp": 7,
+   "fp": 0,
+   "fn": 0,
+   "support": 7,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "suspicious_comment": {
+   "tp": 4,
+   "fp": 1,
+   "fn": 0,
+   "support": 4,
+   "precision": 0.8,
+   "recall": 1.0,
+   "f1": 0.888888888888889
+  },
+  "http_without_tls": {
+   "tp": 12,
+   "fp": 5,
+   "fn": 1,
+   "support": 13,
+   "precision": 0.7058823529411765,
+   "recall": 0.9230769230769231,
+   "f1": 0.8000000000000002
+  },
+  "weak_crypto": {
+   "tp": 1,
+   "fp": 3,
+   "fn": 0,
+   "support": 1,
+   "precision": 0.25,
+   "recall": 1.0,
+   "f1": 0.4
+  },
+  "none": {
+   "tp": 35,
+   "fp": 11,
+   "fn": 8,
+   "support": 43,
+   "precision": 0.7608695652173914,
+   "recall": 0.813953488372093,
+   "f1": 0.7865168539325844
+  },
+  "micro": {
+   "tp": 31,
+   "fp": 63,
+   "fn": 48,
+   "support": 79,
+   "precision": 0.32978723404255317,
+   "recall": 0.3924050632911392,
+   "f1": 0.35838150289017345
+  },
+  "macro": {
+   "precision": 0.4122159975101152,
+   "recall": 0.6373626373626374
+  }
+ },
  "chef|all|GLITCH ASE'22": {
   "admin_by_default": {
    "tp": 15,
@@ -2712,6 +2799,93 @@
   "macro": {
    "precision": 0.7229427736006684,
    "recall": 0.7987080487080487
+  }
+ },
+ "chef|test|SLAC (original)": {
+  "admin_by_default": {
+   "tp": 0,
+   "fp": 1,
+   "fn": 32,
+   "support": 32,
+   "precision": 0.0,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "empty_password": {
+   "tp": 0,
+   "fp": 4,
+   "fn": 4,
+   "support": 4,
+   "precision": 0.0,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "hardcoded_secret": {
+   "tp": 7,
+   "fp": 34,
+   "fn": 3,
+   "support": 10,
+   "precision": 0.17073170731707318,
+   "recall": 0.7,
+   "f1": 0.2745098039215686
+  },
+  "invalid_bind": {
+   "tp": 4,
+   "fp": 0,
+   "fn": 0,
+   "support": 4,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "suspicious_comment": {
+   "tp": 3,
+   "fp": 0,
+   "fn": 0,
+   "support": 3,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "http_without_tls": {
+   "tp": 1,
+   "fp": 1,
+   "fn": 1,
+   "support": 2,
+   "precision": 0.5,
+   "recall": 0.5,
+   "f1": 0.5
+  },
+  "weak_crypto": {
+   "tp": 1,
+   "fp": 3,
+   "fn": 0,
+   "support": 1,
+   "precision": 0.25,
+   "recall": 1.0,
+   "f1": 0.4
+  },
+  "none": {
+   "tp": 26,
+   "fp": 10,
+   "fn": 6,
+   "support": 32,
+   "precision": 0.7222222222222222,
+   "recall": 0.8125,
+   "f1": 0.7647058823529411
+  },
+  "micro": {
+   "tp": 16,
+   "fp": 43,
+   "fn": 40,
+   "support": 56,
+   "precision": 0.2711864406779661,
+   "recall": 0.2857142857142857,
+   "f1": 0.27826086956521734
+  },
+  "macro": {
+   "precision": 0.4172473867595819,
+   "recall": 0.6
   }
  },
  "chef|test|GLITCH ASE'22": {

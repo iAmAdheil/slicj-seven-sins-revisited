@@ -2,7 +2,7 @@
 
 Course project, **Cloud SRE and Security** — Adheil Gupta (23BDS002), Om Pandey (23BDS040).
 
-Selected paper: A. Rahman, C. Parnin, L. Williams, *The Seven Sins: Security Smells in Infrastructure as Code Scripts*, ICSE 2019 (`inputs/icse19_slic.pdf`).
+Selected paper: A. Rahman, C. Parnin, L. Williams, *The Seven Sins: Security Smells in Infrastructure as Code Scripts*, ICSE 2019.
 
 This repository:
 
@@ -11,7 +11,7 @@ This repository:
 3. **Adds context-aware triage.** Code computes context facts and masks secrets. A decision model (TypeSafe **Jev**, through OpenRouter) answers one typed question per finding. Code makes the final keep/drop decision.
 4. **Evaluates** all of this on the GLITCH oracle datasets (RQ1–RQ3), on 206k scripts (RQ2), and against prompt-injection comments (RQ4).
 
-The research paper is `paper/main.pdf` (LaTeX source `paper/main.tex`).
+The research paper is `paper/main.pdf` (LaTeX source `paper/main.tex`). The two-person talk is `presentation/Seven_Sins_Revisited_Presentation.pptx`, with `presentation/speaker_script.md`.
 
 ## Headline results
 
@@ -20,7 +20,7 @@ The research paper is `paper/main.pdf` (LaTeX source `paper/main.tex`).
 | RQ1 | A reimplementation from the paper alone matches the original SLIC on 58% of findings (Jaccard). The code port matches it at 0.99. We list six differences between the paper and the code, including one check whose output never reaches the report. |
 | RQ2 | SLIC-J micro-F1 is 0.64 / 0.82 / 0.63 (Puppet / Ansible / Chef). GLITCH v2 scores 0.62 / 0.86 / 0.54. The new TLS smell is in 1.01% of 107,955 Ansible scripts, with 59/60 sampled findings correct. |
 | RQ3 | Jev triage moves precision from 0.561 to 0.782 and recall from 0.858 to 0.812 (F1 0.679 → 0.797, McNemar p = 2e-15). For hard-coded secrets, false alarms drop from 80 to 4. Claude Haiku 5.5 reaches F1 0.811 (difference not significant) at 4× the cost and 3× the latency. |
-| RQ4 | One injected comment flips 97.5% of a decision model's true findings to "safe". A chat LLM ignores the injection, but a "dummy value" comment flips up to 20% of its true findings. Removing comments from the model input brings every attack down to ≤ 1.6%. |
+| RQ4 | One injected comment flips 97.5% of a decision model's true findings to "safe". A chat LLM ignores the injection, but a "dummy value" comment flips up to 20% of its true findings. Removing comments from the model input brings every attack down to ≤ 1.6% at each model's tuned threshold (rates are higher at a fixed 0.5, see the paper). |
 
 ## Layout
 
@@ -39,7 +39,7 @@ experiments/              one script per research question + analysis.py (tables
 tests/                    pytest, incl. the paper's Fig. 4 / Fig. 5 examples
 results/                  all outputs; results/cache holds every model request/response
 paper/                    LaTeX paper, generated tables and figures, compiled PDF
-inputs/                   the selected paper, the reference deck, the earlier planning chat
+presentation/             slide deck, speaker script, deck generator
 data/, tools/, .venv/     downloaded datasets and tools (git-ignored, re-creatable)
 ```
 

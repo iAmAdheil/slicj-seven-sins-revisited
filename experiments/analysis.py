@@ -107,7 +107,7 @@ def table_rq1():
                         "GLITCH ASE'22", "GLITCH v2 (live)", "SLIC-J rules"],
              "ansible": ["SLAC (original)", "ours: code rules", "ours: paper rules", "GLITCH ASE'22",
                          "GLITCH v2 (live)", "SLIC-J rules"],
-             "chef": ["ours: code rules", "ours: paper rules", "GLITCH ASE'22", "GLITCH v2 (live)", "SLIC-J rules"]}
+             "chef": ["SLAC (original)", "ours: code rules", "ours: paper rules", "GLITCH ASE'22", "GLITCH v2 (live)", "SLIC-J rules"]}
     short = ["Adm", "Emp", "Sec", "IP", "Sus", "HTTP", "Cry"]
     lines = [r"\begin{table*}[t]\centering\caption{RQ1/RQ2: precision / recall per smell on the three GLITCH oracle "
              r"datasets (all files; GLITCH matching protocol). Micro values pool all seven smells. "
@@ -366,7 +366,7 @@ def rq4():
     if not out:
         return {}
     lines = [r"\begin{table}[t]\centering\caption{RQ4: flip rate (true findings that the model drops after a "
-             r"misleading comment is inserted) with comments visible / removed from the state.}\label{tab:rq4}",
+             r"misleading comment is inserted) with comments visible / removed from the state, at each model's tuned threshold (Mercury-Decide 0.05, Haiku 0.12).}\label{tab:rq4}",
              r"\scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{llcc}\toprule",
              r"Model & Attack (position) & Visible & Removed \\ \midrule"]
     for tag, d in out.items():
@@ -431,7 +431,7 @@ def fig_secret():
     """Hard-coded secret precision per tool and technology (the noisiest smell)."""
     det = json.load(open(R / "rq1" / "detection.json"))
     techs = ["puppet", "ansible", "chef"]
-    tools = [("SLIC/SLAC original", {"puppet": "SLIC (original)", "ansible": "SLAC (original)"}),
+    tools = [("SLIC/SLAC original", {"puppet": "SLIC (original)", "ansible": "SLAC (original)", "chef": "SLAC (original)"}),
              ("GLITCH v2", {t: "GLITCH v2 (live)" for t in techs}),
              ("SLIC-J rules", {t: "SLIC-J rules" for t in techs})]
     fig, ax = plt.subplots(figsize=(3.45, 2.1))

@@ -39,7 +39,7 @@ McNemar $p<10^{-14}$); for hard-coded secrets it removes 76 of 80 false alarms.
 A chat LLM is slightly better (F1 0.81, not significant) at 4$\times$ the cost and 3$\times$ the latency.
 Finally, one injected comment flips 97.5\% of a decision model's true findings to ``safe''; a chat LLM ignores the
 injection but believes a ``dummy value'' comment in up to 20\% of cases. Stripping comments from the model's input
-reduces both attacks to at most 1.6\%.
+reduces both attacks to at most 1.6\% at the tuned threshold.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -189,8 +189,8 @@ sins; oracle labels for ``no integrity check'' and ``missing default case'' are 
 \textbf{Matching.} We use GLITCH's protocol: a finding is a true positive if file, category and line match an oracle
 entry (file and category suffice for weak crypto and IP binding); each oracle entry matches once. For the Ansible
 outputs of SLAC and GLITCH'22, which carry code text instead of line numbers, we copy GLITCH's text matching. Our
-evaluator reproduces every published per-smell value of SLIC, SLAC and GLITCH'22 on all three oracles exactly, which
-validates it.
+evaluator reproduces all 77 per-smell precision and recall values that GLITCH publishes for SLIC, SLAC and GLITCH'22 on
+the seven smells, which validates it.
 
 \textbf{Baselines.} Original SLIC (re-run) and SLAC; GLITCH'22 (packaged output) and GLITCH~v2 (current release, run
 by us). For triage: rules only; a \emph{practitioner-context filter} (hand-written: drop placeholder secrets, file
@@ -242,13 +242,12 @@ micro precision 0.28, and 0.10 for hard-coded secrets.
 
 \subsection{RQ2: Portability and the new smell}
 Table~\ref{tab:rq1} shows that \slicj{} reaches micro-F1 0.64 on Puppet (SLIC 0.39, GLITCH~v2 0.62), 0.82 on Ansible
-(SLAC 0.65, GLITCH~v2 0.86) and 0.63 on Chef (GLITCH~v2 0.54). Recall is high (0.91/1.00/0.75); precision is held
+(SLAC 0.65, GLITCH~v2 0.86) and 0.63 on Chef (SLAC 0.36, GLITCH~v2 0.54). Recall is high (0.91/1.00/0.75); precision is held
 down by hard-coded secrets (0.19--0.44) and HTTP (0.38--0.74) for every tool (Fig.~\ref{fig:secret}).
 
 \begin{figure}[t]\centering
 \includegraphics[width=\columnwidth]{figures/fig_secret.pdf}
-\caption{Hard-coded secret precision on the oracles. Every rule-based tool stays below 0.45. (SLAC's Chef output has
-no line numbers and cannot be scored.)}\label{fig:secret}
+\caption{Hard-coded secret precision on the oracles. Every rule-based tool stays below 0.45.}\label{fig:secret}
 \end{figure}
 
 \input{tables/rq2.tex}
@@ -336,7 +335,7 @@ the injection placed above the line flips 119 of 122 kept true findings (97.5\%)
 The chat LLM behaves differently. Claude Haiku~5.5 ignores the explicit injection (0 of 55 flips) and the authority claim (1 of 55), but the \emph{placeholder} claim still flips 16.4\% (above) and 20.0\% (inline) of its kept true findings: the model does not obey the comment, it \emph{believes} it. A plausible statement of fact is the more dangerous attack for a model that resists instructions.
 
 \textbf{Mitigation.} Removing comments from the state cuts every attack to at most 1.6\% for Mercury-Decide (the
-same level as the noise from shifting a line number) and to 0\% for Haiku, and it costs no accuracy on clean data (RQ3). Our first version
+same level as the noise from shifting a line number) and to 0\% for Haiku at each model's tuned threshold (0.05 and 0.12), and it costs no accuracy on clean data (RQ3). These low thresholds matter. At a fixed threshold of 0.5 the attacks are stronger (Haiku placeholder flips reach 50.0\%, Mercury-Decide inline injection 54.3\%). With comments removed, Haiku then still shows 16.1\% flips in the ``above'' position. That value is the same for all three attack texts, because the inputs are then identical, so the attack text is not the cause. The likely cause is the shifted line number. Our first version
 stripped comments only from the code window and left them in the separate ``flagged line'' field: the inline injection
 then still flipped 45.2\% of true findings. A mitigation has to cover every field the model can read.
 
@@ -344,8 +343,7 @@ then still flipped 45.2\% of true findings. A mitigation has to cover every fiel
 \section{Discussion}
 \textbf{For tool builders.} A linter that publishes rules should publish them as code, with tests built from the
 paper's own examples: the printed admin rule fails on the paper's own Fig.~4, and the dead check would fail any
-end-to-end test of its rule. Line numbers in outputs are not optional either: SLAC's Chef output carries none and cannot be
-scored at line level.
+end-to-end test of its rule.
 
 \textbf{For SRE teams.} Keep rules as the high-recall front end; they are cheap, deterministic and explainable.
 Put a decision model behind them only for the noisy smells (secrets, HTTP, comments), let code compute and mask

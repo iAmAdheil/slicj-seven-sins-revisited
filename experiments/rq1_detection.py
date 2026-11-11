@@ -3,7 +3,7 @@ GLITCH oracle datasets.
 
 Tools compared per technology:
   SLIC (original)      - output of the authors' Ruby SLIC, shipped in the GLITCH package (Puppet)
-  SLAC (original)      - output of the authors' Ansible port (Ansible), lines recovered from CODE text
+  SLAC (original)      - output of the authors' port: Ansible (lines recovered from CODE text), Chef (lines in the CSV)
   GLITCH ASE'22        - output shipped in the package
   GLITCH v2 (live)     - current GLITCH, run by us
   ours: paper          - our Python SLIC with Table II/III as printed
@@ -49,7 +49,8 @@ def load_line_csv(path):
             s = GLITCH_ERR.get(r["ERROR"])
             if s:
                 out.append(Finding(s, os.path.basename(r["PATH"]), int(r["LINE"]), "", "", "", ""))
-    return dedupe(out)
+    # GLITCH's fix_*_dataset.py keeps every line = -1 row (file-level findings) and dedupes the rest
+    return [f for f in out if f.line == -1] + dedupe([f for f in out if f.line != -1])
 
 
 def load_glitch_v2(path):
@@ -110,6 +111,8 @@ def tools_for(tech):
         t["SLIC (original)"] = load_line_csv(an / "SLIC-puppet-oracle.csv")
     if tech == "ansible":
         t["SLAC (original)"] = load_slac_ansible(an / "SLAC-ansible-oracle.csv")
+    if tech == "chef":
+        t["SLAC (original)"] = load_line_csv(an / "SLAC-chef-oracle.csv")
     if tech in ("puppet", "chef"):
         t["GLITCH ASE'22"] = load_line_csv(an / f"GLITCH-{tech}-oracle.csv")
     else:

@@ -11,3 +11,5 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 paper/preview/
+presentation/node_modules/
+presentation/render/
