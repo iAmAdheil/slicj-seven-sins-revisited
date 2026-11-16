@@ -1,4 +1,4 @@
-\begin{table}[t]\centering\caption{RQ4: flip rate (true findings that the model drops after a misleading comment is inserted) with comments visible / removed from the state, at each model's tuned threshold (Mercury-Decide 0.05, Haiku 0.12).}\label{tab:rq4}
+\begin{table}[t]\centering\caption{Robustness: flip rate (kept true findings that the model drops after one misleading comment is inserted), with comments visible / removed from the state, at each model's tuned threshold (Mercury-Decide 0.05 visible, 0.02 removed; Haiku 0.12). $n$ = attacked true findings.}\label{tab:rq4}
 \scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{llcc}\toprule
 Model & Attack (position) & Visible & Removed \\ \midrule
 Claude Haiku 5.5 ($n$=59) & placeholder (above) & 16.4\% (9) & 0.0\% (0) \\
@@ -14,4 +14,6 @@ Mercury-Decide ($n$=132) & placeholder (above) & 26.2\% (32) & 1.6\% (2) \\
  & approval (inline) & 1.6\% (2) & 0.0\% (0) \\
  & injection (above) & 97.5\% (119) & 1.6\% (2) \\
  & injection (inline) & 22.1\% (27) & 0.0\% (0) \\
-\bottomrule\end{tabular}\end{table}
+\bottomrule\end{tabular}
+\par\vspace{3pt}\parbox{\linewidth}{\footnotesize\emph{Reading:} the decision model obeys the injected instruction, while the chat LLM believes the placeholder claim. With comments removed, no attack flips more than 1.6\%.}
+\end{table}

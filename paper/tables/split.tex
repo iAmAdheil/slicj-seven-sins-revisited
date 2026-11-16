@@ -1,0 +1,17 @@
+\begin{table}[t]\centering\caption{Portability (A): micro-averaged accuracy of the rules alone, on all oracle files and on the 70\% test split. SLIC-J's rules were tuned on the other 30\%.}\label{tab:split}
+\scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{llccc}\toprule
+Tech & Tool & F1 (all files) & P / R (test) & F1 (test) \\ \midrule
+Puppet & Original SLIC & 0.39 & 0.26 / 0.60 & 0.37 \\
+ & GLITCH v2 & 0.62 & 0.49 / 0.97 & \textbf{0.65} \\
+ & SLIC-J & \textbf{0.64} & 0.44 / 0.89 & 0.59 \\
+\midrule
+Ansible & Original SLAC & 0.65 & 0.34 / 0.71 & 0.46 \\
+ & GLITCH v2 & \textbf{0.86} & 0.59 / 1.00 & \textbf{0.74} \\
+ & SLIC-J & 0.82 & 0.50 / 1.00 & 0.67 \\
+\midrule
+Chef & Original SLAC & 0.36 & 0.27 / 0.29 & 0.28 \\
+ & GLITCH v2 & 0.54 & 0.46 / 0.55 & 0.50 \\
+ & SLIC-J & \textbf{0.63} & 0.50 / 0.64 & \textbf{0.56} \\
+\bottomrule\end{tabular}
+\par\vspace{3pt}\parbox{\linewidth}{\footnotesize\emph{Reading:} bold marks the best F1 per technology. On the test files, GLITCH v2 leads on Puppet and Ansible and SLIC-J leads on Chef. The all-files column includes the tuning files, which favours SLIC-J.}
+\end{table}

@@ -35,11 +35,11 @@ Site reliability teams configure whole fleets with scripts. This example comes f
 
 The authors studied 1,726 Puppet scripts by hand and derived seven smells. Each smell maps to a CWE weakness. They then built SLIC. SLIC has two parts. A parser turns a script into tokens with a name and a value. A rule engine matches string patterns on those tokens. For example, if a name contains 'password' and the value is a non-empty string, SLIC reports a hard-coded secret. The authors scanned 15,232 scripts and found 21,201 smells. When they asked developers, 64.4 percent of the 104 replies agreed with the finding. Developers who disagreed often gave context as the reason. Remember that point, because it comes back later.
 
-### Slide 4: We asked four research questions
+### Slide 4: We studied four topics
 
 **Adheil**, about 40 seconds
 
-We asked four questions. First, can SLIC be rebuilt from the paper? Second, does the approach port to Ansible and Chef, and can it find a new kind of smell? I will answer these two. Third, can a decision model remove false alarms, and what does that cost? Fourth, can an attacker fool that model with a comment in the script? Om will answer these two.
+We studied four topics. First, reproduction: can SLIC be rebuilt from the paper? Second, portability: does the approach port to Ansible and Chef, and can it find a new kind of smell? I will answer these two. Third, triage: can a decision model remove false alarms, and what does that cost? Fourth, robustness: can an attacker fool that model with a comment in the script? Om will answer these two.
 
 ### Slide 5: We tested on labels that we did not write
 
@@ -47,7 +47,7 @@ We asked four questions. First, can SLIC be rebuilt from the paper? Second, does
 
 A claim needs a fair test, so we did not label the main test data ourselves. We used the three test sets that the GLITCH authors published at ASE 2022. They contain about 80 scripts per technology and 176 scored smells, with a line number for each smell. Before we trusted our scorer, we checked it. It reproduces all 77 published per-smell values for SLIC, SLAC and GLITCH. We also ran the authors' original SLIC on this machine. Its output matched the published output on all 120 findings. To limit overfitting, we refined rules only on a fixed 30 percent of the files. For the triage experiment we used 5-fold cross-validation, grouped by file, with 10 seeds.
 
-### Slide 6: RQ1: the paper alone is not enough
+### Slide 6: Reproduction: the paper alone is not enough
 
 **Adheil**, about 55 seconds
 
@@ -59,7 +59,7 @@ We built SLIC twice. The first version uses only the rules that the paper prints
 
 We traced the gap to six differences. The printed admin rule requires 'admin' and 'user' in the name. The paper's own example has 'admin' in the value, so the printed rule misses it. The private-key pattern is not a valid regular expression as printed. The secret rule in the code is much wider than the table. The weak crypto rule flags any token, not only functions. The comment rule uses more keywords. The sixth difference is my favourite. One rule prints a tag that ends in three colons. The driver searches for a tag that ends in an underscore. The two strings never match, so this check never reaches the report. Enabling it would add 11 findings on this test set.
 
-### Slide 8: RQ2: the port competes with a current tool
+### Slide 8: Portability: the port competes with a current tool
 
 **Adheil**, about 55 seconds
 
@@ -77,7 +77,7 @@ We also added an eighth smell. Turning off TLS certificate checks makes HTTPS op
 
 Thanks, Adheil. We keep the rules, because they are cheap and deterministic, and they find most smells. We add a step behind them. First, code collects facts about each finding: is the value a literal or a variable, does it look like a placeholder, is it a known key format, where does the URL point. Second, code masks anything that could be a working secret. The model sees only the shape of the value. Third, a decision model answers one question: is this a genuine instance of this smell, by this definition? We use TypeSafe Jev. It does not write text. It returns a probability. Fourth, code makes the final decision with a threshold tuned on training folds. So the model is one replaceable part, and code stays in control.
 
-### Slide 11: RQ3: precision up 0.22, recall down 0.05
+### Slide 11: Triage: precision up 0.22, recall down 0.05
 
 **Om**, about 55 seconds
 
@@ -93,7 +93,7 @@ This chart shows precision per smell. Almost all of the gain comes from hard-cod
 
 **Om**, about 55 seconds
 
-We replaced Jev with other models. The API makes that a one-line change. Claude Haiku has the highest F1, 0.81, but the paired difference to Jev is not significant: p is 0.33, and the interval includes zero. Haiku costs about four times more and takes about three times longer per call. Jev costs 0.035 dollars per thousand findings. Most decision models land between 0.75 and 0.80. Two are no better than the rules alone. So we conclude: pin the model version, and test before you trust a model. Jev also beats a simple logistic regression in paired decisions, but its F1 interval includes zero. We do not claim that Jev is the best model. We claim that this design works, and the model can be replaced.
+We replaced Jev with other models. The API makes that a one-line change. Claude Haiku has the highest F1, 0.81, but the paired difference to Jev is not significant: p is 0.33, and the interval includes zero. Haiku costs about four times more and takes about three times longer per call. Jev costs 0.035 dollars per thousand findings. Most decision models land between 0.75 and 0.80. Two are no better than the rules alone. So we conclude: pin the model version, and test before you trust a model. We do not claim that Jev is the best model. We claim that this design works, and the model can be replaced.
 
 ### Slide 14: A surprise: practitioner context hurt F1
 
@@ -101,7 +101,7 @@ We replaced Jev with other models. The API makes that a one-line change. Claude 
 
 Here is a result we did not expect. The original paper quotes developers who reject findings because of context, for example 'it's using http on localhost, what's the risk?'. So we wrote a filter with those arguments. It drops placeholder passwords, loopback URLs and similar cases. It made F1 worse: 0.64 against 0.68 for rules alone. Recall fell from 0.86 to 0.74. The reason is the test set. Its raters label a password like 'vagrant' as a smell, because by definition it is one. A developer may still not fix it. So 'is it a smell?' and 'should we fix it?' are two different questions, and this test set answers only the first. A future study should label both.
 
-### Slide 15: RQ4: one comment can fool the model
+### Slide 15: Robustness: one comment can fool the model
 
 **Om**, about 70 seconds
 
@@ -111,7 +111,7 @@ Anyone who can open a pull request can add a comment. So we inserted one comment
 
 **Om**, about 55 seconds
 
-We want to be clear about the limits. The test sets are small, and rare smells have fewer than ten instances, so per-smell numbers for those are weak. The labels contain noise. We refined the rules on 30 percent of the same files, so the candidate generator is not fully independent of the test data. Jev itself was not attacked in RQ4. The attack rates depend on the threshold. And one rater checked the TLS sample. All the code and the numbers are public, so anyone can check or extend this work.
+We want to be clear about the limits. The test sets are small, and rare smells have fewer than ten instances, so per-smell numbers for those are weak. The labels contain noise. We refined the rules on 30 percent of the same files, so the candidate generator is not fully independent of the test data. Jev itself was not attacked in the robustness test. The attack rates depend on the threshold. And one rater checked the TLS sample. All the code and the numbers are public, so anyone can check or extend this work.
 
 ### Slide 17: Three takeaways
 
@@ -121,23 +121,23 @@ Three takeaways. One: publish rules as tested code, because the paper alone did 
 
 ## Backup slides (use only if asked)
 
-### Slide 18: Backup: RQ4 at a fixed threshold of 0.5
+### Slide 18: Backup: robustness at a fixed threshold of 0.5
 
 **Om**
 
 Use this slide if the professor asks about thresholds. The tuned thresholds are low, 0.05 and 0.12, because F1 on this data rewards keeping almost everything. At a threshold of 0.5, attack rates are higher. Haiku placeholder flips reach about 50 percent. With comments removed, Haiku still shows 16.1 percent in the 'above' position. That number is the same for all three attack texts, because after comment removal the three inputs are identical. So the attack text is not the cause. The likely cause is the shift of one line number, which moves some scores across 0.5.
 
-### Slide 19: Backup: RQ3 results for key methods
+### Slide 19: Backup: triage results for key methods
 
 **Om**
 
-Mean over 10 seeds of grouped 5-fold cross-validation, with the threshold tuned inside the training folds. AUC and ECE use the raw scores. The hybrid is a logistic regression over the facts plus Jev's probability. It has the best AUC and calibration and the highest precision, but its tuned threshold gives lower recall. The full table with all models is in the paper.
+Mean over 10 seeds of grouped 5-fold cross-validation, with the threshold tuned inside the training folds. AUC and ECE use the raw scores. The full table with all models is in the paper.
 
 ### Slide 20: Backup: paired statistical tests
 
 **Om**
 
-McNemar compares two methods on the same candidates, using only the cases where they disagree. The bootstrap resamples files, not findings, because findings in one file are not independent. A difference is clear when the interval excludes zero. Note that Jev versus logistic regression has a significant McNemar test, but its F1 interval includes zero, so we describe that one as weaker evidence.
+McNemar compares two methods on the same candidates, using only the cases where they disagree. The bootstrap resamples files, not findings, because findings in one file are not independent. A difference is clear when the interval excludes zero.
 
 ### Slide 21: Backup: smell prevalence in the corpora
 
@@ -175,7 +175,7 @@ Our rules do not count variable references or lookups as hard-coded. The corpus 
 
 **Q: How do you stop overfitting?** (Om)
 
-Thresholds and logistic weights are fit only on training folds, and folds are grouped by file. The remaining risk: rule refinement looked at 30 percent of the same files. We list that as a threat.
+Thresholds are fit only on training folds, and folds are grouped by file. The remaining risk: rule refinement looked at 30 percent of the same files. We list that as a threat.
 
 **Q: What is McNemar, and why a file-level bootstrap?** (Om)
 
@@ -187,19 +187,19 @@ The difference is not significant. Jev costs about a quarter as much and is abou
 
 **Q: What is calibration, and is Jev calibrated?** (Om)
 
-A calibrated 0.8 means about 80 percent of those cases are true. Jev is not well calibrated: ECE is 0.152. The hybrid is better at 0.073, so tune thresholds on your own sample.
+A calibrated 0.8 means about 80 percent of those cases are true. Jev is not well calibrated: ECE is 0.152. So tune thresholds on your own sample.
 
-**Q: Why are the RQ4 thresholds so low?** (Om)
+**Q: Why are the robustness thresholds so low?** (Om)
 
 F1 on this data rewards keeping almost everything, so the best threshold is near 0.05 to 0.12. That is why backup slide 18 also shows 0.5, where attack rates are higher.
 
-**Q: Why was RQ4 not run on Jev?** (Om)
+**Q: Why was the robustness test not run on Jev?** (Om)
 
-The OpenRouter free allowance ran out after RQ3. We used a free decision model and the Claude CLI. The script runs unchanged on Jev with credit. So we do not know Jev's own flip rate.
+The OpenRouter free allowance ran out after the triage experiments. We used a free decision model and the Claude CLI. The script runs unchanged on Jev with credit. So we do not know Jev's own flip rate.
 
 **Q: The Haiku arm ran through a CLI. Does that matter?** (Om)
 
-The CLI loads a user-level instruction file, so the context is not empty. It is the same for clean and attacked inputs. On RQ3 the CLI arm scores F1 0.809 and the API arm 0.811, so the two paths agree closely.
+The CLI loads a user-level instruction file, so the context is not empty. It is the same for clean and attacked inputs. In the triage experiments the CLI arm scores F1 0.809 and the API arm 0.811, so the two paths agree closely.
 
 **Q: Does masking fully protect secrets?** (Om)
 

@@ -1,0 +1,8 @@
+\begin{table}[t]\centering\caption{Reproduction: two rebuilds of SLIC on the GLITCH Puppet oracle (54 marked smells). Jaccard compares each rebuild's findings with the original tool's output.}\label{tab:repro}
+\scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{lccccccc}\toprule
+Rebuild & Jaccard & TP & FP & Missed & P & R & F1 \\ \midrule
+Released SLIC code (used) & 0.99 & 34 & 87 & 20 & 0.28 & 0.63 & 0.39 \\
+Rules printed in the paper & 0.58 & 33 & 46 & 21 & 0.42 & 0.61 & 0.50 \\
+\bottomrule\end{tabular}
+\par\vspace{3pt}\parbox{\linewidth}{\footnotesize\emph{Reading:} the code rebuild reproduces the tool (Jaccard 0.99). The printed rules give a higher F1 on this oracle, but they are a different detector, so the study continues with the code.}
+\end{table}

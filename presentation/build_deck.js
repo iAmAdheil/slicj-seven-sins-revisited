@@ -215,24 +215,23 @@ const SEC3 = "Backup slides";
   });
 }
 
-// 4 ---------------------------------------------------------- RQs
+// 4 ---------------------------------------------------------- topics
 {
   const s = slide({
     sectionName: SEC1, who: "Adheil", secs: 40,
-    title: "We asked four research questions",
-    notes: "We asked four questions. First, can SLIC be rebuilt from the paper? Second, does the approach port to Ansible and Chef, and can it find a new kind of smell? I will answer these two. Third, can a decision model remove false alarms, and what does that cost? Fourth, can an attacker fool that model with a comment in the script? Om will answer these two.",
+    title: "We studied four topics",
+    notes: "We studied four topics. First, reproduction: can SLIC be rebuilt from the paper? Second, portability: does the approach port to Ansible and Chef, and can it find a new kind of smell? I will answer these two. Third, triage: can a decision model remove false alarms, and what does that cost? Fourth, robustness: can an attacker fool that model with a comment in the script? Om will answer these two.",
   });
   const rq = [
-    ["RQ1", "Reproduction", "Can we rebuild SLIC from the paper, and does the rebuild match the released tool?", "Adheil"],
-    ["RQ2", "Portability", "How accurate is a port to Ansible and Chef? How common is a new TLS smell?", "Adheil"],
-    ["RQ3", "Triage", "How much precision does a context-aware decision model add? At what recall and cost?", "Om"],
-    ["RQ4", "Robustness", "Can a misleading comment talk the model out of a true finding? What stops that?", "Om"],
+    ["Reproduction", "Can we rebuild SLIC from the paper, and does the rebuild match the released tool?", "Adheil"],
+    ["Portability", "How accurate is a port to Ansible and Chef? How common is a new TLS smell?", "Adheil"],
+    ["Triage", "How much precision does a context-aware decision model add? At what recall and cost?", "Om"],
+    ["Robustness", "Can a misleading comment talk the model out of a true finding? What stops that?", "Om"],
   ];
-  rq.forEach(([id, nm, q, who], i) => {
+  rq.forEach(([nm, q, who], i) => {
     const x = 0.6 + (i % 2) * 6.2, y = 1.55 + Math.floor(i / 2) * 2.65;
     card(s, x, y, 5.93, 2.4);
-    s.addText(id, { shape: pres.ShapeType.roundRect, rectRadius: 0.1, x: x + 0.25, y: y + 0.25, w: 0.95, h: 0.5, fill: { color: i < 2 ? C.accent2 : C.accent1 }, color: C.background1, bold: true, fontSize: 18, align: "center", valign: "middle", margin: 0, objectName: id });
-    text(s, nm, x + 1.4, y + 0.25, 4.3, 0.5, { fontSize: 20, bold: true, valign: "middle" });
+    text(s, nm, x + 0.25, y + 0.25, 5.43, 0.5, { fontSize: 20, bold: true, valign: "middle", color: i < 2 ? C.accent2 : C.accent1 });
     text(s, q, x + 0.25, y + 0.95, 5.43, 0.95, { fontSize: 16 });
     text(s, `Presented by ${who}`, x + 0.25, y + 1.92, 5.43, 0.3, { fontSize: 13, color: C.text2 });
   });
@@ -269,12 +268,12 @@ const SEC3 = "Backup slides";
   });
 }
 
-// 6 ---------------------------------------------------------- RQ1 result
+// 6 ---------------------------------------------------------- reproduction result
 {
   const a = stats.rq1.paper_vs_original, b = stats.rq1.port_vs_original;
   const s = slide({
     sectionName: SEC1, who: "Adheil", secs: 55,
-    title: "RQ1: the paper alone is not enough",
+    title: "Reproduction: the paper alone is not enough",
     notes: `We built SLIC twice. The first version uses only the rules that the paper prints. It agrees with the original tool on 58 percent of findings, measured with Jaccard overlap. It shares ${a.both} findings, misses ${a.only_original}, and adds ${a.only_ours}. The second version copies the released Ruby code token by token. It shares all ${b.both} findings and adds ${b.only_ours}. That one extra comes from a .pp file that contains Haskell-style comments, not Puppet. So the tool is reproducible from the code, but not from the paper. One more result: on this independent test set, the original SLIC has micro precision 0.28, far from the 0.99 that the paper reports on its own test set.`,
   });
   card(s, 0.6, 1.55, 5.9, 3.3);
@@ -328,12 +327,12 @@ const SEC3 = "Backup slides";
   text(s, "extra findings on the Puppet test set if this check reaches the report. The two tags never match, so SLIC drops them without a warning.", 8.55, 4.85, 3.95, 1.5, { fontSize: 15, valign: "middle" });
 }
 
-// 8 ---------------------------------------------------------- RQ2 chart
+// 8 ---------------------------------------------------------- portability chart
 {
   const techs = ["puppet", "ansible", "chef"], labels = ["Puppet", "Ansible", "Chef"];
   const s = slide({
     sectionName: SEC1, who: "Adheil", secs: 55,
-    title: "RQ2: the port competes with a current tool",
+    title: "Portability: the port competes with a current tool",
     notes: "SLIC-J is our port. For Ansible we walk the YAML and keep line numbers. For Chef we read the Ruby line by line. We compared F1 with the current GLITCH release, which we ran ourselves. On Puppet and Chef, SLIC-J is slightly ahead. On Ansible, GLITCH is ahead. The authors' original tools are lower on all three. I must add one caution. We refined our rules on 30 percent of these same test sets, and GLITCH was not tuned on them. So read this as competitive, not as better. Precision on hard-coded secrets stays low for every tool, between 0.19 and 0.44 for us. That is the problem Om will address.",
   });
   s.addChart(pres.ChartType.bar, [
@@ -406,12 +405,12 @@ const SEC3 = "Backup slides";
   text(s, "Answer: P(yes), a number from 0 to 1", 8.42, 5.98, 4.1, 0.4, { fontSize: 15, bold: true });
 }
 
-// 11 --------------------------------------------------------- RQ3 main
+// 11 --------------------------------------------------------- triage main
 {
   const t = stats.rq3_tests["jev-full vs rules"];
   const s = slide({
     sectionName: SEC2, who: "Om", secs: 55,
-    title: "RQ3: precision up 0.22, recall down 0.05",
+    title: "Triage: precision up 0.22, recall down 0.05",
     notes: `We tested 269 candidate findings: 151 true and 118 false. The rules alone have precision 0.56 and recall 0.86. With Jev and the full context, precision rises to 0.78 and recall falls to 0.81. F1 rises from 0.68 to 0.80. Recall counts all 176 labelled smells, so the rules' own misses count against us. The result is significant. In a paired test, the triage step corrected ${t.a_right_b_wrong} decisions and broke ${t.a_wrong_b_right}. The McNemar p-value is about 2 times 10 to the minus 15. A file-level bootstrap gives an F1 gain of 0.125, with a 95 percent interval from 0.08 to 0.18. Context also helped: the full state beat the flagged line alone by 0.03 F1, and that interval excludes zero.`,
   });
   const labels = ["Precision", "Recall", "F1"];
@@ -448,7 +447,7 @@ const SEC3 = "Backup slides";
   const list = [
     ["llm-anthropic_claude-haiku-5.5", "Claude Haiku 5.5 (chat)"], ["dm-openai_gpt-6-luna-decisions", "GPT-6 Luna Decisions"], ["jev-full", "Jev 1.13"], ["dm-liquid_d1-ultra", "Liquid d1-ultra"],
     ["dm-perplexity_pplx-decider-v1.2", "Perplexity Decider"], ["dm-typesafe_jev-1.14", "Jev 1.14"], ["dm-inception_mercury-decide", "Mercury-Decide"], ["dm-cloudflare_clef", "Cloudflare Clef"],
-    ["logreg", "LogReg on our facts"], ["dm-upstage_solar-decide", "Upstage Solar-Decide"], ["rules", "Rules only"], ["dm-microsoft_microsoft-decision-1", "Microsoft Decision-1"],
+    ["dm-upstage_solar-decide", "Upstage Solar-Decide"], ["rules", "Rules only"], ["dm-microsoft_microsoft-decision-1", "Microsoft Decision-1"],
   ];
   const rev = [...list].reverse(); // horizontal bars draw bottom-up
   const t = stats.rq3_tests["llm-anthropic_claude-haiku-5.5 vs jev-full"];
@@ -456,10 +455,10 @@ const SEC3 = "Backup slides";
   const s = slide({
     sectionName: SEC2, who: "Om", secs: 55,
     title: "A chat model is not significantly better",
-    notes: `We replaced Jev with other models. The API makes that a one-line change. Claude Haiku has the highest F1, 0.81, but the paired difference to Jev is not significant: p is 0.33, and the interval includes zero. Haiku costs about four times more and takes about three times longer per call. Jev costs ${cj[0].toFixed(3)} dollars per thousand findings. Most decision models land between 0.75 and 0.80. Two are no better than the rules alone. So we conclude: pin the model version, and test before you trust a model. Jev also beats a simple logistic regression in paired decisions, but its F1 interval includes zero. We do not claim that Jev is the best model. We claim that this design works, and the model can be replaced.`,
+    notes: `We replaced Jev with other models. The API makes that a one-line change. Claude Haiku has the highest F1, 0.81, but the paired difference to Jev is not significant: p is 0.33, and the interval includes zero. Haiku costs about four times more and takes about three times longer per call. Jev costs ${cj[0].toFixed(3)} dollars per thousand findings. Most decision models land between 0.75 and 0.80. Two are no better than the rules alone. So we conclude: pin the model version, and test before you trust a model. We do not claim that Jev is the best model. We claim that this design works, and the model can be replaced.`,
   });
   s.addChart(pres.ChartType.bar, [{ name: "F1", labels: rev.map((x) => x[1]), values: rev.map((x) => m(x[0]).F1) }], barOpts({
-    x: 0.6, y: 1.45, w: 7.6, h: 5.35, barDir: "bar", chartColors: rev.map((x) => (x[0] === "jev-full" ? "C43A4B" : x[0].startsWith("llm") ? "E8A100" : x[0] === "rules" || x[0] === "logreg" ? "4A4E5C" : "7B8794")),
+    x: 0.6, y: 1.45, w: 7.6, h: 5.35, barDir: "bar", chartColors: rev.map((x) => (x[0] === "jev-full" ? "C43A4B" : x[0].startsWith("llm") ? "E8A100" : x[0] === "rules" ? "4A4E5C" : "7B8794")),
     showLegend: false, barGapWidthPct: 30, valAxisMaxVal: 1, catAxisLabelFontSize: 12, altText: "F1 of twelve triage methods, sorted",
   }));
   const hdr = (x, a) => ({ text: x, options: { bold: true, align: a || "right", fill: { color: C.text1 }, color: C.background1 } });
@@ -484,7 +483,7 @@ const SEC3 = "Backup slides";
     notes: "Here is a result we did not expect. The original paper quotes developers who reject findings because of context, for example 'it's using http on localhost, what's the risk?'. So we wrote a filter with those arguments. It drops placeholder passwords, loopback URLs and similar cases. It made F1 worse: 0.64 against 0.68 for rules alone. Recall fell from 0.86 to 0.74. The reason is the test set. Its raters label a password like 'vagrant' as a smell, because by definition it is one. A developer may still not fix it. So 'is it a smell?' and 'should we fix it?' are two different questions, and this test set answers only the first. A future study should label both.",
   });
   card(s, 0.6, 1.55, 5.93, 3.2);
-  text(s, "What a developer said (paper, RQ4)", 0.85, 1.72, 5.4, 0.4, { fontSize: 18, bold: true });
+  text(s, "What a developer said (original study)", 0.85, 1.72, 5.4, 0.4, { fontSize: 18, bold: true });
   text(s, "“It’s using http on localhost, what’s the risk?”", 0.85, 2.25, 5.4, 1.0, { fontSize: 24, italic: true, fontFace: THEME.headFontFace, valign: "middle" });
   text(s, "So we wrote a filter that drops placeholder secrets, file paths, and loopback or namespace URLs.", 0.85, 3.45, 5.4, 1.1, { fontSize: 16 });
   card(s, 6.8, 1.55, 5.93, 3.2);
@@ -502,7 +501,7 @@ const SEC3 = "Backup slides";
   text(s, "“Is it a smell?” and “Should we fix it?” are different questions. This test set answers only the first.", 7.05, 5.05, 5.45, 1.45, { fontSize: 18, bold: true, color: C.background1, valign: "middle" });
 }
 
-// 15 --------------------------------------------------------- RQ4
+// 15 --------------------------------------------------------- robustness
 {
   const keys = ["placeholder|above", "placeholder|inline", "approval|above", "approval|inline", "injection|above", "injection|inline"];
   const labels = [["above", "inline", "above", "inline", "above", "inline"], ["placeholder", "", "approval", "", "injection", ""]];
@@ -510,7 +509,7 @@ const SEC3 = "Backup slides";
   const opts = (x, title) => barOpts({ x, y: 1.4, w: 6.0, h: 3.65, chartColors: [C.accent1, C.accent2], valAxisMaxVal: 115, dataLabelFormatCode: "0", catAxisLabelFontSize: 12, dataLabelFontSize: 12, legendFontSize: 12, showTitle: true, title, titleFontFace: "+mn-lt", titleFontSize: 15, titleColor: C.text1, altText: title });
   const s = slide({
     sectionName: SEC2, who: "Om", secs: 70,
-    title: "RQ4: one comment can fool the model",
+    title: "Robustness: one comment can fool the model",
     notes: "Anyone who can open a pull request can add a comment. So we inserted one comment next to each true finding and measured how often the model changed its mind. We used three texts: a false claim that the value is a dummy, a false claim of security approval, and a direct instruction to answer false. On the decision model, the direct instruction above the line flips 97.5 percent of true findings. Claude Haiku ignores that instruction, but it believes the dummy-value claim: up to 20 percent flip. Then we tested a fix: remove all comments from the model's input. Flips fall to 1.6 percent or less, with no loss of accuracy. Our first fix missed one field, the flagged line, and 45 percent of inline attacks still worked. So a fix must cover every field. Two cautions. These rates are at each model's tuned threshold, and backup slide 18 shows a threshold of 0.5, where rates are higher. Also, the API credit ran out, so we did not run this on Jev itself.",
   });
   s.addChart(pres.ChartType.bar, [
@@ -541,13 +540,13 @@ const SEC3 = "Backup slides";
   const s = slide({
     sectionName: SEC2, who: "Om", secs: 55,
     title: "What our results do not show",
-    notes: "We want to be clear about the limits. The test sets are small, and rare smells have fewer than ten instances, so per-smell numbers for those are weak. The labels contain noise. We refined the rules on 30 percent of the same files, so the candidate generator is not fully independent of the test data. Jev itself was not attacked in RQ4. The attack rates depend on the threshold. And one rater checked the TLS sample. All the code and the numbers are public, so anyone can check or extend this work.",
+    notes: "We want to be clear about the limits. The test sets are small, and rare smells have fewer than ten instances, so per-smell numbers for those are weak. The labels contain noise. We refined the rules on 30 percent of the same files, so the candidate generator is not fully independent of the test data. Jev itself was not attacked in the robustness test. The attack rates depend on the threshold. And one rater checked the TLS sample. All the code and the numbers are public, so anyone can check or extend this work.",
   });
   const lim = [
     ["Small test sets", "176 labelled smells in total. Weak crypto and empty password have 10 or fewer."],
     ["Label noise", "Some “false” HTTP findings look real, so the labels may miss true smells."],
     ["Rules saw part of the data", "We refined rules on 30% of the same files that cross-validation uses."],
-    ["Jev not attacked", "RQ4 used Mercury-Decide and Haiku. The script runs on Jev with API credit."],
+    ["Jev not attacked", "The robustness test used Mercury-Decide and Haiku. The script runs on Jev with API credit."],
     ["Threshold matters", "At a fixed 0.5, attack rates rise. Haiku placeholder flips reach 50%. See slide 18."],
     ["One rater for TLS", "One rater checked the 60 sampled findings. Agreement is not measured."],
   ];
@@ -586,11 +585,11 @@ const hd = (x, a) => ({ text: x, options: { bold: true, align: a || "right", fil
 const rr = (x, b) => ({ text: x, options: { align: "right", bold: !!b } });
 const tblOpts = (o) => Object.assign({ fontSize: 14, color: C.text1, valign: "middle", border: { type: "solid", pt: 0.75, color: "D9DBE1" } }, o);
 
-// B1 RQ4 at fixed threshold
+// B1 robustness at fixed threshold
 {
   const s = slide({
     section: SEC3, sectionName: SEC3, backup: true, who: "Om",
-    title: "Backup: RQ4 at a fixed threshold of 0.5",
+    title: "Backup: robustness at a fixed threshold of 0.5",
     notes: "Use this slide if the professor asks about thresholds. The tuned thresholds are low, 0.05 and 0.12, because F1 on this data rewards keeping almost everything. At a threshold of 0.5, attack rates are higher. Haiku placeholder flips reach about 50 percent. With comments removed, Haiku still shows 16.1 percent in the 'above' position. That number is the same for all three attack texts, because after comment removal the three inputs are identical. So the attack text is not the cause. The likely cause is the shift of one line number, which moves some scores across 0.5.",
   });
   const keys = ["placeholder|above", "placeholder|inline", "approval|above", "approval|inline", "injection|above", "injection|inline"];
@@ -601,23 +600,23 @@ const tblOpts = (o) => Object.assign({ fontSize: 14, color: C.text1, valign: "mi
   s.addTable([
     [hd("Attack, position", "left"), hd("Mercury tuned, visible"), hd("Mercury 0.5, visible"), hd("Mercury 0.5, removed"), hd("Haiku tuned, visible"), hd("Haiku 0.5, visible"), hd("Haiku 0.5, removed")],
     ...body,
-  ], tblOpts({ x: 0.6, y: 1.5, w: 12.13, colW: [2.83, 1.55, 1.55, 1.55, 1.55, 1.55, 1.55], rowH: [0.8, 0.45, 0.45, 0.45, 0.45, 0.45, 0.45], objectName: "RQ4 thresholds" }));
+  ], tblOpts({ x: 0.6, y: 1.5, w: 12.13, colW: [2.83, 1.55, 1.55, 1.55, 1.55, 1.55, 1.55], rowH: [0.8, 0.45, 0.45, 0.45, 0.45, 0.45, 0.45], objectName: "Robustness thresholds" }));
   text(s, "With comments removed, the “above” inputs are identical across the three attack texts. The remaining flips therefore do not come from the attack text. The likely cause is the shift of one line number, which moves scores near 0.5.", 0.6, 5.3, 12.13, 0.95, { fontSize: 16 });
   text(s, "Kept true findings at 0.5: Mercury 105 (visible), 106 (removed). Haiku 32 (visible), 31 (removed).", 0.6, 6.35, 12.13, 0.3, { fontSize: 12, color: C.text2 });
 }
 
-// B2 RQ3 table
+// B2 triage table
 {
   const s = slide({
     sectionName: SEC3, backup: true, who: "Om",
-    title: "Backup: RQ3 results for key methods",
-    notes: "Mean over 10 seeds of grouped 5-fold cross-validation, with the threshold tuned inside the training folds. AUC and ECE use the raw scores. The hybrid is a logistic regression over the facts plus Jev's probability. It has the best AUC and calibration and the highest precision, but its tuned threshold gives lower recall. The full table with all models is in the paper.",
+    title: "Backup: triage results for key methods",
+    notes: "Mean over 10 seeds of grouped 5-fold cross-validation, with the threshold tuned inside the training folds. AUC and ECE use the raw scores. The full table with all models is in the paper.",
   });
-  const list = [["rules", "Rules only"], ["context-filter", "Practitioner filter"], ["logreg", "LogReg on facts"], ["jev-line", "Jev 1.13, line only"], ["jev-full", "Jev 1.13, full context"], ["jev-full_nocomments", "Jev 1.13, no comments"], ["llm-anthropic_claude-haiku-5.5", "Claude Haiku 5.5"], ["hybrid:jev-full", "Hybrid: LogReg + Jev"]];
+  const list = [["rules", "Rules only"], ["context-filter", "Practitioner filter"], ["jev-line", "Jev 1.13, line only"], ["jev-full", "Jev 1.13, full context"], ["jev-full_nocomments", "Jev 1.13, no comments"], ["llm-anthropic_claude-haiku-5.5", "Claude Haiku 5.5"]];
   s.addTable([
     [hd("Method", "left"), hd("Precision"), hd("Recall"), hd("F1"), hd("AUC"), hd("ECE")],
     ...list.map(([k, nm]) => [{ text: nm, options: { bold: k === "jev-full" } }, rr(f3(m(k).P), k === "jev-full"), rr(f3(m(k).R), k === "jev-full"), rr(f3(m(k).F1), k === "jev-full"), rr(m(k).AUC ? f3(m(k).AUC) : "–"), rr(m(k).ECE ? f3(m(k).ECE) : "–")]),
-  ], tblOpts({ x: 0.6, y: 1.5, w: 12.13, colW: [4.63, 1.5, 1.5, 1.5, 1.5, 1.5], rowH: 0.5, objectName: "RQ3 table" }));
+  ], tblOpts({ x: 0.6, y: 1.5, w: 12.13, colW: [4.63, 1.5, 1.5, 1.5, 1.5, 1.5], rowH: 0.5, objectName: "Triage table" }));
   text(s, "AUC = how well scores rank true above false. ECE = gap between predicted and observed rates (lower is better).", 0.6, 6.25, 12.13, 0.3, { fontSize: 12, color: C.text2 });
 }
 
@@ -627,9 +626,9 @@ const tblOpts = (o) => Object.assign({ fontSize: 14, color: C.text1, valign: "mi
   const s = slide({
     sectionName: SEC3, backup: true, who: "Om",
     title: "Backup: paired statistical tests",
-    notes: "McNemar compares two methods on the same candidates, using only the cases where they disagree. The bootstrap resamples files, not findings, because findings in one file are not independent. A difference is clear when the interval excludes zero. Note that Jev versus logistic regression has a significant McNemar test, but its F1 interval includes zero, so we describe that one as weaker evidence.",
+    notes: "McNemar compares two methods on the same candidates, using only the cases where they disagree. The bootstrap resamples files, not findings, because findings in one file are not independent. A difference is clear when the interval excludes zero.",
   });
-  const rowsT = [["jev-full vs rules", "Jev vs rules only"], ["jev-full vs context-filter", "Jev vs practitioner filter"], ["jev-full vs logreg", "Jev vs LogReg"], ["jev-full vs jev-line", "Jev full vs Jev line only"], ["llm-anthropic_claude-haiku-5.5 vs jev-full", "Haiku vs Jev"], ["hybrid:jev-full vs jev-full", "Hybrid vs Jev"]];
+  const rowsT = [["jev-full vs rules", "Jev vs rules only"], ["jev-full vs context-filter", "Jev vs practitioner filter"], ["jev-full vs jev-line", "Jev full vs Jev line only"], ["llm-anthropic_claude-haiku-5.5 vs jev-full", "Haiku vs Jev"]];
   const fp = (p) => (p < 0.001 ? p.toExponential(1) : p.toFixed(3));
   s.addTable([
     [hd("Comparison (A vs B)", "left"), hd("A right, B wrong"), hd("A wrong, B right"), hd("McNemar p"), hd("ΔF1"), hd("95% interval")],
@@ -682,13 +681,13 @@ const QA = [
   ["Why is the recall ceiling 0.858?", "Adheil", "The rules produce 151 of the 176 labelled smells. Triage can only drop candidates, so it cannot recover the other 25."],
   ["What is Jaccard and why use it?", "Adheil", "Shared findings divided by all findings of both tools. It measures whether two tools report the same things, not whether those things are correct."],
   ["Why is your any-smell rate lower than SLAC's?", "Adheil", "Our rules do not count variable references or lookups as hard-coded. The corpus also differs, so we cannot separate the two effects."],
-  ["How do you stop overfitting?", "Om", "Thresholds and logistic weights are fit only on training folds, and folds are grouped by file. The remaining risk: rule refinement looked at 30 percent of the same files. We list that as a threat."],
+  ["How do you stop overfitting?", "Om", "Thresholds are fit only on training folds, and folds are grouped by file. The remaining risk: rule refinement looked at 30 percent of the same files. We list that as a threat."],
   ["What is McNemar, and why a file-level bootstrap?", "Om", "McNemar compares two methods on the same items, using only the items where they disagree. We resample files because findings in one file are not independent."],
   ["Why Jev and not Haiku, which scored higher?", "Om", "The difference is not significant. Jev costs about a quarter as much and is about three times faster per call. The design does not depend on Jev. A team can use either model."],
-  ["What is calibration, and is Jev calibrated?", "Om", "A calibrated 0.8 means about 80 percent of those cases are true. Jev is not well calibrated: ECE is 0.152. The hybrid is better at 0.073, so tune thresholds on your own sample."],
-  ["Why are the RQ4 thresholds so low?", "Om", "F1 on this data rewards keeping almost everything, so the best threshold is near 0.05 to 0.12. That is why backup slide 18 also shows 0.5, where attack rates are higher."],
-  ["Why was RQ4 not run on Jev?", "Om", "The OpenRouter free allowance ran out after RQ3. We used a free decision model and the Claude CLI. The script runs unchanged on Jev with credit. So we do not know Jev's own flip rate."],
-  ["The Haiku arm ran through a CLI. Does that matter?", "Om", "The CLI loads a user-level instruction file, so the context is not empty. It is the same for clean and attacked inputs. On RQ3 the CLI arm scores F1 0.809 and the API arm 0.811, so the two paths agree closely."],
+  ["What is calibration, and is Jev calibrated?", "Om", "A calibrated 0.8 means about 80 percent of those cases are true. Jev is not well calibrated: ECE is 0.152. So tune thresholds on your own sample."],
+  ["Why are the robustness thresholds so low?", "Om", "F1 on this data rewards keeping almost everything, so the best threshold is near 0.05 to 0.12. That is why backup slide 18 also shows 0.5, where attack rates are higher."],
+  ["Why was the robustness test not run on Jev?", "Om", "The OpenRouter free allowance ran out after the triage experiments. We used a free decision model and the Claude CLI. The script runs unchanged on Jev with credit. So we do not know Jev's own flip rate."],
+  ["The Haiku arm ran through a CLI. Does that matter?", "Om", "The CLI loads a user-level instruction file, so the context is not empty. It is the same for clean and attacked inputs. In the triage experiments the CLI arm scores F1 0.809 and the API arm 0.811, so the two paths agree closely."],
   ["Does masking fully protect secrets?", "Om", "No. It masks values that do not look like placeholders or plain identifiers, and lines with a sensitive name. A secret on a line with an unrelated name can reach the model. It reduces exposure. It does not remove it."],
   ["How does this differ from IntelliSA (MSR 2026)?", "Om", "IntelliSA also uses rules and then a neural filter, and it reports F1 83 percent on its own data. We add a verified reproduction of SLIC, a new smell, a comparison of decision models, calibration, secret masking and a prompt-injection test. The data sets differ, so the F1 values are not directly comparable."],
   ["Which parts did each of you do?", "Both", "ANSWER THIS IN YOUR OWN WORDS. See the note at the top of this file."],

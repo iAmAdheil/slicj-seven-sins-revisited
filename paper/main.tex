@@ -5,15 +5,15 @@
 \usepackage{amsmath}
 \usepackage{xcolor}
 \usepackage{url}
+\usepackage[section]{placeins}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
 \usepackage[hidelinks]{hyperref}
-\usepackage{listings}
-\lstset{basicstyle=\ttfamily\scriptsize,columns=fullflexible,breaklines=true,frame=single,framerule=0.3pt,
-        rulecolor=\color{gray!60},xleftmargin=2pt,xrightmargin=2pt,aboveskip=4pt,belowskip=4pt}
 \newcommand{\slicj}{SLIC-J}
 
 \begin{document}
 
-\title{Seven Sins Revisited: Reproducing SLIC, Porting It to Ansible and Chef, and Triaging Its False Positives with Context-Aware Decision Models}
+\title{SLIC-J: Porting the SLIC Security-Smell Linter to Ansible and Chef, with LLM Triage to Cut False Positives}
 
 \author{\IEEEauthorblockN{Adheil Gupta (23BDS002) \qquad Om Pandey (23BDS040)}
 \IEEEauthorblockA{Course project, Cloud SRE and Security\\
@@ -23,368 +23,415 @@
 \maketitle
 
 \begin{abstract}
-Infrastructure as code (IaC) scripts configure cloud fleets, so a single insecure pattern can spread to every server.
-Rahman et al.\ (ICSE~2019) defined seven security smells for Puppet and built SLIC, a rule-based linter.
-We reproduce SLIC, port it to Ansible and Chef, and attack its main weakness: false positives.
-First, a reimplementation from the paper alone agrees with the released tool on only 58\% of findings; we locate
-six differences between the paper and the code, including a check that never reaches the output.
-A token-level port of the released rules matches the original on 120 of 120 findings (Jaccard 0.99).
-Second, our port, \slicj{}, reaches micro-F1 0.64/0.82/0.63 on the Puppet/Ansible/Chef oracle datasets of
-GLITCH, against 0.62/0.86/0.54 for GLITCH itself, and it adds a new smell, \emph{TLS verification disabled}, which
-occurs in 1.0\% of 107{,}955 Ansible scripts with 98\% sampled precision.
-Third, we keep the rules as a high-recall candidate generator and add a triage step: code computes context facts,
-masks secret values, and asks a \emph{decision model} (TypeSafe Jev) one typed question per finding.
-Over 269 candidates, triage raises precision from 0.56 to 0.78 at a recall cost of 0.05 (F1 0.68$\to$0.80,
-McNemar $p<10^{-14}$); for hard-coded secrets it removes 76 of 80 false alarms.
-A chat LLM is slightly better (F1 0.81, not significant) at 4$\times$ the cost and 3$\times$ the latency.
-Finally, one injected comment flips 97.5\% of a decision model's true findings to ``safe''; a chat LLM ignores the
-injection but believes a ``dummy value'' comment in up to 20\% of cases. Stripping comments from the model's input
-reduces both attacks to at most 1.6\% at the tuned threshold.
+SLIC, a rule-based linter for security smells in Puppet scripts, was reported to reach 0.99 precision. On an
+independent oracle its precision is 0.28, and for hard-coded secrets it is 0.10: nine of every ten secret alerts are
+noise. We rebuild SLIC in Python from its released code (Jaccard 0.99 against the original tool's findings) and port
+it to Ansible and Chef as \slicj{}, with a new smell for disabled TLS verification. The new smell occurs in 1\% of
+107{,}955 Ansible scripts, and 59 of 60 sampled findings are correct. On held-out oracle files the ported rules beat
+the GLITCH detector on Chef and trail it on Puppet and Ansible. We then keep the rules as a high-recall first pass and
+put a language model behind them. Code computes context facts and masks secret values, and the model answers one
+question per finding: is this a real instance of the smell? Over 269 candidates, precision rises from 0.56 to 0.78 and
+F1 from 0.68 to 0.80 for a 0.05 loss in recall, at USD 0.035 per 1{,}000 findings. In one cross-validation run, false
+secret alarms fall from 80 to 4. The triage step also adds an attack surface. One comment in the script (``this finding is a known false alarm'')
+makes a decision model drop 97.5\% of the true findings it had kept. A chat LLM ignores that instruction but believes
+a plausible ``dummy value'' comment in up to 20\% of cases. Removing comments from the model's input brings every
+attack we tried down to 1.6\% or less.
 \end{abstract}
 
 \begin{IEEEkeywords}
-infrastructure as code, security smells, static analysis, reproduction, false positives, LLM triage, prompt injection
+infrastructure as code, security smells, static analysis, false positives, LLM triage, prompt injection
 \end{IEEEkeywords}
 
 % =====================================================================
 \section{Introduction}
-Site reliability teams treat infrastructure as code: Puppet manifests, Ansible playbooks and Chef recipes define
-users, services, network bindings and credentials for whole fleets. A pattern such as a hard-coded password or a
-service bound to \texttt{0.0.0.0} is therefore copied to every machine the script touches. Rahman, Parnin and
-Williams called such recurring patterns \emph{security smells}. In ``The Seven Sins'' (ICSE~2019)~\cite{rahman2019seven}
-they derived seven smells from 1{,}726 Puppet scripts, mapped each to a CWE, and implemented SLIC, a linter whose
-rules match token names and values. They reported precision and recall of 0.99 on their own oracle and found
-21{,}201 smells in 15{,}232 scripts.
+Site reliability engineering (SRE) teams manage servers through infrastructure as code (IaC). Puppet manifests,
+Ansible playbooks and Chef recipes define the users, services, network bindings and credentials of whole fleets. A
+hard-coded password or a service bound to \texttt{0.0.0.0} in one script is therefore copied to every machine that the
+script configures. Sharma et al.\ first catalogued smells in configuration code~\cite{sharma2016config}. Rahman,
+Parnin and Williams narrowed the idea to \emph{security smells}: they derived seven of them from 1{,}726 Puppet
+scripts, mapped each to a CWE, and built SLIC, a linter that matches token names and values~\cite{rahman2019seven}.
+On their own oracle SLIC reached 0.99 precision and recall.
 
-Later work showed two problems. Rule-based detectors over-approximate: on the independent oracles of
-GLITCH~\cite{saavedra2022glitch}, SLIC's precision for hard-coded secrets is 0.10. And practitioners judge findings
-by context: in the original study a developer rejected an HTTP finding because ``it's using http on localhost'', and
-Reis et al.\ found that precision drops further when maintainers who know the application judge
-it~\cite{reis2022feedback}. Recent work therefore pairs rules with a learned filter~\cite{mei2026intellisa}.
+Those numbers did not hold up on other data. On the oracle datasets of GLITCH~\cite{saavedra2022glitch}, SLIC's
+precision for hard-coded secrets is 0.10. Practitioners also judge findings by context that a token rule cannot see.
+In the original study a developer rejected an HTTP finding because ``it's using http on localhost'', and Reis et
+al.\ found that precision drops further when maintainers who know the application judge the
+findings~\cite{reis2022feedback}.
 
-This paper is a course project with the brief ``implement the approach of a selected paper, evaluate it, and report''.
-We implement SLIC, test how far the paper alone lets one rebuild it, port it to two more IaC tools, and then add a
-context-aware triage layer. We answer four research questions:
+Two earlier studies shape ours. GLITCH~\cite{saavedra2022glitch,saavedra2023glitch} translates Puppet, Ansible and
+Chef into one intermediate model and runs a single set of checks. We take four things from it: the three oracle
+datasets that we test on, the matching protocol that decides when a finding is correct, the keyword lists that our
+rules use, and the tool itself as the main comparison. SLAC~\cite{rahman2021slac}, by the authors of SLIC, ports the
+seven rules to Ansible and Chef. Its rule ports are the starting point for our Ansible and Chef rules, and its
+released outputs are the baseline for those two technologies.
+
+We build \slicj{} in two steps. First, we port SLIC to Python and extend it to Ansible and Chef. Second, we add a
+triage step in which a language model reviews each finding. We study four questions:
 \begin{itemize}
-\item \textbf{RQ1 (reproduction).} Can SLIC be rebuilt from the paper, and does the rebuild match the released tool?
-\item \textbf{RQ2 (portability).} How accurate is a port to Ansible and Chef, and how common is a new smell for disabled TLS verification?
-\item \textbf{RQ3 (triage).} How much precision do context facts and a decision model add, and at what recall, cost and calibration?
-\item \textbf{RQ4 (robustness).} Can a misleading comment in the script talk the triage model out of a true finding, and does a simple input rule stop it?
+\item \textbf{Reproduction.} Does a Python rebuild of SLIC give the same findings as the released tool?
+\item \textbf{Portability.} How accurate are the ported rules on Ansible and Chef, and how common is a new smell for
+disabled TLS verification?
+\item \textbf{Triage.} How much precision do context facts and a decision model add, and what do they cost in recall,
+money and latency?
+\item \textbf{Robustness.} Can a misleading comment in the script talk the model out of a true finding, and does a
+simple input rule stop it?
 \end{itemize}
 
-\textbf{Contributions.} (1) A Python reimplementation of SLIC in two forms, ``paper rules'' and a token-level port of
-the released code, plus a list of six paper--code differences. (2) \slicj{}, a port of the seven rules to Ansible and
-Chef with a new eighth smell. (3) A triage design in which code computes and masks context and a decision model
-answers one typed question, evaluated against eight decision models, a chat LLM, a learned baseline and a hybrid,
-with calibration, cost and latency. (4) A prompt-injection test for IaC triage and a mitigation.
-All code, cached model responses and scripts that regenerate every number are in the artifact.
+\textbf{Contributions.} (1) \slicj{}, a Python port of SLIC that reproduces the original tool's findings, extended to
+Ansible and Chef with an eighth smell for disabled TLS verification. (2) An evaluation of the rules on all oracle files
+and on a 70\% test split that rule tuning never saw. (3) A triage design in which code computes and masks context and a
+decision model answers one typed question, compared with eight other decision models and a chat LLM on accuracy,
+cost and latency. (4) A comment-injection test for IaC triage, and a mitigation. The artifact contains all code, the
+cached model responses, and scripts that regenerate every number in this paper.
 
 % =====================================================================
 \section{Background and Related Work}
-\subsection{The seven sins and SLIC}
+\subsection{Security smells and SLIC}
 The seven smells are \emph{admin by default} (CWE-250), \emph{empty password} (CWE-258), \emph{hard-coded secret}
 (CWE-798/259), \emph{invalid IP address binding} (CWE-284), \emph{suspicious comment} (CWE-546), \emph{use of HTTP
 without TLS} (CWE-319) and \emph{use of weak cryptography algorithms} (CWE-327/326)~\cite{rahman2019seven}.
-SLIC has two parts. A \emph{parser}, built on puppet-lint, turns a script into vectors such as
-\texttt{<VARIABLE, '\$vcenter\_password', 'password'>}. A \emph{rule engine} applies Table~II of the paper, e.g.\
-hard-coded secret $=(\mathit{isAttribute}(x)\lor\mathit{isVariable}(x))\land(\mathit{isUser}(x.\mathit{name})\lor
-\mathit{isPassword}(x.\mathit{name})\lor\mathit{isPvtKey}(x.\mathit{name}))\land \mathit{length}(x.\mathit{value})>0$,
-with string patterns from Table~III. The same authors later ported the rules to Ansible and Chef (SLAC) and found
-smells in 25.3--29.6\% of Ansible scripts~\cite{rahman2021slac}.
+SLIC has two parts. A \emph{parser}, built on puppet-lint, turns a script into token vectors such as
+\texttt{<VARIABLE, '\$vcenter\_password', 'password'>}. A \emph{rule engine} then applies one logical rule per
+smell. For example, a hard-coded secret is an attribute or variable whose name looks like a user, password or private
+key and whose value is not empty. SLAC later found smells in 25.3--29.6\% of the scripts it
+studied~\cite{rahman2021slac}.
 
-\subsection{Later detectors}
-GLITCH~\cite{saavedra2022glitch,saavedra2023glitch} translates Puppet, Ansible, Chef and Terraform into one
-intermediate model and runs a single set of checks; its replication package~\cite{glitchpkg2022} contains three oracle
-datasets of about 80 scripts each, labelled by seven raters, which we reuse. GASEL~\cite{opdebeeck2023gasel} adds
-control and data flow for Ansible. Opdebeeck et al.\ predict which Ansible module parameters hold
-secrets~\cite{opdebeeck2025smelling}. IntelliSA~\cite{mei2026intellisa} over-approximates with rules and filters false
-positives with a model distilled from an LLM. Our triage step follows the same ``rules propose, a model disposes''
-idea, but uses System One decision models, measures calibration and prompt-injection robustness, and never sends a
-raw secret to the model.
+\subsection{Other detectors}
+Besides GLITCH, GASEL~\cite{opdebeeck2023gasel} adds control and data flow for Ansible, and Opdebeeck et al.\ predict
+which Ansible module parameters hold secrets~\cite{opdebeeck2025smelling}. IntelliSA~\cite{mei2026intellisa} is the
+closest work to our triage step. It over-approximates with rules and filters false positives with a model distilled
+from an LLM. We follow the same idea of rules that propose and a model that filters, but we use hosted decision
+models, measure robustness to comments written by an attacker, and never send a raw secret to the model.
 
 \subsection{Decision models}
-TypeSafe's Jev is a \emph{System One} model: it does not generate text, it answers typed questions about a given
-state and returns probabilities~\cite{typesafe2026jev}. A \emph{Noul} question returns $P(\text{yes})$; a
-\emph{Choice} question returns a distribution over options. OpenRouter exposes Jev and about twenty similar models
-through one Decisions API~\cite{openrouter2026jev}. The vendor recommends that code keeps control of the flow,
-combines answers with deterministic rules and escalates low-confidence cases, and it warns that content written to
-steer the model can move its answer. Our design and RQ4 follow directly from these two statements.
+TypeSafe's Jev is a \emph{System One} model. It does not generate text. It answers typed questions about a given
+state and returns probabilities~\cite{typesafe2026jev}. A \emph{Noul} question returns $P(\text{yes})$, and a
+\emph{Choice} question returns a distribution over options. OpenRouter serves Jev and about twenty similar models
+through one Decisions API~\cite{openrouter2026jev}. The vendor recommends that code keeps control of the flow, combines
+answers with deterministic rules and escalates low-confidence cases. It also warns that content written to steer the
+model can move its answer. Our design follows the first statement, and our robustness test checks the second.
 
 % =====================================================================
 \section{Approach}
+Fig.~\ref{fig:pipeline} shows the full \slicj{} pipeline. A parser turns each script into tokens, and the rule engine
+flags candidate findings. The rules are tuned for recall, so many candidates are false alarms. For each candidate,
+code then computes context facts, masks secret values and removes comments. A decision model reads this state and
+returns the probability that the finding is real. Code keeps the finding if the probability reaches a threshold tuned
+on labelled data. The model never makes the final call, and it never sees a working credential.
+
 \begin{figure}[t]\centering
-\fbox{\begin{minipage}{0.95\columnwidth}\footnotesize
-\textbf{Script} (.pp / .yml / .rb) $\rightarrow$ \textbf{Parser} (SLIC tokens: VARIABLE, ATTRIBUTE, PARAMETER,
-FUNCTION, COMMENT) $\rightarrow$ \textbf{Rule engine} (7 sins + TLS-off; high recall) $\rightarrow$
-\textbf{Context layer} (code only: value kind, shape, entropy bucket, key format, placeholder, host scope, URL kind,
-path purpose, $\pm3$-line window; secrets masked) $\rightarrow$ \textbf{Decision model} (one Noul question:
-``is this a genuine instance of the smell, by this definition?'') $\rightarrow$ \textbf{Code decides}
-(threshold tuned on training folds) $\rightarrow$ report.
-\end{minipage}}
-\caption{\slicj{} pipeline. Only the last two steps are new relative to SLIC.}\label{fig:pipeline}
+\begin{tikzpicture}[
+  box/.style={draw=black!70, rounded corners=1.5pt, align=center, font=\scriptsize, text width=1.66cm,
+              minimum height=1.05cm, inner sep=2pt},
+  code/.style={box, fill=black!6},
+  model/.style={box, fill=blue!10},
+  arr/.style={-{Stealth[length=4pt]}, black!75, line width=0.5pt},
+  grp/.style={draw=black!35, dashed, rounded corners=3pt, inner sep=3.5pt},
+  lab/.style={font=\scriptsize\itshape, text=black!70}]
+\node[code] (script) {\textbf{Script}\\.pp / .yml / .rb};
+\node[code, right=0.32cm of script] (parser) {\textbf{Parser}\\SLIC tokens with line numbers};
+\node[code, right=0.32cm of parser] (rules) {\textbf{Rule engine}\\7 smells + TLS, tuned for recall};
+\node[code, right=0.32cm of rules] (cand) {\textbf{Candidates}\\file, line, smell, reason};
+\node[code, below=0.95cm of script] (ctx) {\textbf{Context layer}\\facts, secrets masked, comments removed};
+\node[model, right=0.32cm of ctx] (dm) {\textbf{Decision model}\\``real smell?'' $\rightarrow P(\text{true})$};
+\node[code, right=0.32cm of dm] (thr) {\textbf{Code decides}\\keep if $P\ge t$};
+\node[code, right=0.32cm of thr] (rep) {\textbf{Report}\\kept findings};
+\draw[arr] (script) -- (parser); \draw[arr] (parser) -- (rules); \draw[arr] (rules) -- (cand);
+\draw[arr] (cand.south) -- ++(0,-0.25) -| (ctx.north);
+\draw[arr] (ctx) -- (dm); \draw[arr] (dm) -- (thr); \draw[arr] (thr) -- (rep);
+\begin{scope}[on background layer]
+\node[grp, fit=(script)(cand)] (g1) {};
+\node[grp, fit=(ctx)(rep)] (g2) {};
+\end{scope}
+\node[lab, anchor=south west] at (g1.north west) {Rule stage: Reproduction (Sec.~\ref{sec:repro}) and Portability (Sec.~\ref{sec:port})};
+\node[lab, anchor=north west] at (g2.south west) {Triage stage: Triage (Sec.~\ref{sec:triage}) and Robustness (Sec.~\ref{sec:robust})};
+\end{tikzpicture}
+\caption{The \slicj{} pipeline. Grey boxes run as deterministic code and the blue box is the only model call. The top
+row is a Python port of SLIC. The bottom row is new: it filters the candidates that the rules propose.}\label{fig:pipeline}
 \end{figure}
-
-\subsection{Reimplementing SLIC (RQ1)}
-We wrote two Python versions. \emph{Paper rules} implement Tables~II and III exactly as printed on top of our own
-lexer. Where the table is not executable we use the evident intent and record the gap. \emph{Code port} mirrors the
-released \texttt{all\_in\_one.rb}~\cite{iacsec} token by token: a lexer reproduces puppet-lint's token types and
-values (\texttt{VARIABLE} without the dollar sign, keywords as their own types, interpolated strings split into
-\texttt{DQPRE}/\texttt{DQPOST}), and each check looks, as the Ruby does, at a token, the next code token and the one
-after it on the same line. To obtain ground truth for the comparison we re-ran the original SLIC with puppet-lint
-2.5.2 and the shipped rules on the Puppet oracle.
-
-\subsection{Porting to Ansible and Chef (RQ2)}
-For Ansible we parse YAML with \texttt{ruamel.yaml}, which keeps line numbers. Keys under a task or module become
-ATTRIBUTE tokens; keys under \texttt{vars:}, \texttt{set\_fact:} and in \texttt{vars/} files become VARIABLE; top-level
-keys of a role's \texttt{defaults/} file become PARAMETER, the nearest analogue of a Puppet class parameter default.
-Jinja calls and filters become FUNCTION tokens; YAML~1.1 booleans (\texttt{yes}/\texttt{no}) are normalised; a
-line-based fallback handles files that are not valid YAML. For Chef we use a line-level reader for node attributes,
-resource properties, hash entries, local variables, two-argument setters and heredoc command text.
-
-\slicj{} keeps the seven rules but (i) matches name \emph{segments} (so \texttt{bypass} is not a password and
-\texttt{dbPassword} is), (ii) requires a literal value for secrets, so variable references, lookups and vault values
-are not ``hard-coded'', and (iii) follows the oracle raters' guide, which widens admin by default to ``every time
-more privileges are being given than necessary'' (e.g.\ \texttt{user => root}). Keyword lists follow GLITCH's
-published configuration with word boundaries.
-
-\textbf{New smell: TLS verification disabled (CWE-295~\cite{cwe295}).} Turning certificate validation off makes
-HTTPS as weak as HTTP against an active attacker, yet it is not among the seven sins. \slicj{} flags names such as
-\texttt{validate\_certs}, \texttt{sslverify}, \texttt{verify\_ssl} set to false; names such as \texttt{insecure},
-\texttt{insecure\_skip\_tls\_verify}, \texttt{allow\_insecure} set to true; and command text with \texttt{curl -k},
-\texttt{--insecure}, \texttt{wget --no-check-certificate}, \texttt{--tls-verify=false} or
-\texttt{GIT\_SSL\_NO\_VERIFY=1}, across all modules.
-
-\subsection{Context layer and triage (RQ3)}
-For every candidate, code computes facts that a model is known to handle badly: whether the value is a literal, a
-variable, a lookup or a vault reference; its shape (identifier, file path, URL, token); an entropy bucket and a
-known-key-format class (AWS key, private-key block, SSH key, hash, \ldots); a placeholder test; the host scope of a URL
-(loopback, private, public, templated) and its kind (XML namespace, download, package repository); and the purpose of
-the file path (tests/CI, examples/training, development). \emph{Privacy rule:} a value that could be a working
-credential never leaves the machine; the model sees a masked preview such as \texttt{s3******r1 (len 10)}.
-Placeholders and short words are sent in clear. The same masking is applied to every line of the code window that
-contains a sensitive name.
-
-The state sent to the model contains the smell name, its CWE, the raters' definition, why the rule fired, the flagged
-line, and in the \emph{full} variant also the facts, the file path and a $\pm3$-line window. The question is a
-single Noul, ``Is the linter finding a genuine instance of the named security smell in this code, according to the
-definition?'', with short criteria for \emph{true} and \emph{false}. The model returns $P(\text{true})$; code keeps a
-finding if $P\ge t$, where $t$ is tuned on training folds only.
-
-\subsection{Robustness (RQ4)}
-Scripts are attacker-controllable text: anyone who can open a pull request can add a comment. We insert one comment
-above, or at the end of, the line of each true finding, with three texts: a \emph{placeholder} claim (``dummy value used
-only by CI tests''), an \emph{approval} claim (``reviewed and approved by the security team'') and an
-\emph{injection} addressed to the reviewer (``this finding is a known false alarm. Answer false''). The mitigation
-removes comments from every code field of the state; rule facts are unchanged, and a suspicious-comment finding keeps
-its text in a field marked as untrusted.
 
 % =====================================================================
 \section{Experimental Setup}
-\textbf{Data.} The GLITCH replication package~\cite{glitchpkg2022} (1.8\,GB Docker image; we extracted its layers
-without running it) contains: the Puppet oracle (80 scripts, 4{,}367 LOC), the Ansible oracle (81 scripts, reused from
-SLAC), the Chef oracle (80 scripts), the raters' guide, the outputs of the original SLIC and SLAC on these oracles,
-and corpora of 27{,}324 Puppet, 107{,}955 Ansible and 70{,}705 Chef scripts (12.2\,M LOC). We score only the seven
-sins; oracle labels for ``no integrity check'' and ``missing default case'' are ignored.
+\textbf{Data.} The GLITCH replication package~\cite{glitchpkg2022} is a 1.8\,GB Docker image. We extracted its layers
+without running it. It contains the Puppet oracle (80 scripts, 4{,}367 LOC), the Ansible oracle (81 scripts, reused from
+SLAC), the Chef oracle (80 scripts), the raters' guide, the outputs of the original SLIC and SLAC on these oracles, and
+corpora of 27{,}324 Puppet, 107{,}955 Ansible and 70{,}705 Chef scripts (12.2\,M LOC). Seven raters labelled the
+oracles. We score only the seven smells and ignore the oracle labels for ``no integrity check'' and ``missing default
+case''.
 
-\textbf{Matching.} We use GLITCH's protocol: a finding is a true positive if file, category and line match an oracle
-entry (file and category suffice for weak crypto and IP binding); each oracle entry matches once. For the Ansible
-outputs of SLAC and GLITCH'22, which carry code text instead of line numbers, we copy GLITCH's text matching. Our
-evaluator reproduces all 77 per-smell precision and recall values that GLITCH publishes for SLIC, SLAC and GLITCH'22 on
-the seven smells, which validates it.
+\textbf{Matching.} We use GLITCH's protocol. A finding is a true positive if its file, smell and line match an oracle
+entry. For weak cryptography and IP binding, file and smell are enough. Each oracle entry matches at most once. The
+Ansible outputs of SLAC and of GLITCH'22 carry code text instead of line numbers, so for them we copy GLITCH's text
+matching. Our evaluator reproduces all 77 per-smell precision and recall values that GLITCH publishes for SLIC, SLAC
+and GLITCH'22, so we trust it.
 
-\textbf{Baselines.} Original SLIC (re-run) and SLAC; GLITCH'22 (packaged output) and GLITCH~v2 (current release, run
-by us). For triage: rules only; a \emph{practitioner-context filter} (hand-written: drop placeholder secrets, file
-paths, loopback/namespace URLs, \ldots); logistic regression on the context facts; Jev~1.13 with the line-only and the
-full state; seven other decision models and Jev~1.14 with the full state; Claude Haiku~5.5 as a chat-LLM baseline
-asked for a JSON probability with the same state; and a hybrid logistic regression over the facts plus Jev's
-probability.
+\textbf{Tuning and test split.} A hash of each file name assigns the oracle files to a fixed 30\% tuning split and a
+70\% test split. All changes to the \slicj{} rules were made while looking at the tuning split only.
 
-\textbf{Protocol.} Rules were refined only on a fixed 30\% development split of the oracle files. Triage is evaluated
-on all 269 candidates with 5-fold cross-validation grouped by file and repeated over 10 seeds; thresholds and logistic
-weights are fit on training folds. Recall is computed against all 176 oracle smells, so findings the rules never
-produced count as misses. We test paired decisions with the exact McNemar test~\cite{mcnemar1947} and report 95\%
-file-level bootstrap intervals for $\Delta$F1 (2{,}000 resamples). Calibration is measured with AUC, the Brier score
-and the expected calibration error (ECE, 10 bins)~\cite{guo2017calibration}. Cost is the API-reported charge.
-
-\textbf{Budget.} The OpenRouter account had a small free allowance. RQ3 ran entirely on paid models (USD 0.20 in
-total). When the allowance ran out, RQ4 had to use a free decision model (Inception Mercury-Decide, which scores
-F1 0.78 on RQ3, close to Jev) and Claude Haiku~5.5 through the Claude Code CLI on a 59-finding stratified sample. The
-RQ4 script runs unchanged on Jev given credits.
+\textbf{Statistics.} We compare paired keep/drop decisions with the exact McNemar test~\cite{mcnemar1947}. For
+differences in F1 we report 95\% bootstrap intervals that resample whole files (2{,}000 resamples). We measure ranking
+with AUC and calibration with the expected calibration error (ECE, 10 bins)~\cite{guo2017calibration}. Cost is the
+charge that the API reports.
 
 % =====================================================================
-\section{Results}
+\section{Reproduction}\label{sec:repro}
+\subsection{Method}
+\slicj{}'s Puppet rules are a token-level port of SLIC's released \texttt{all\_in\_one.rb}~\cite{iacsec}. A lexer
+reproduces puppet-lint's token types and values: \texttt{VARIABLE} without the dollar sign, keywords as their own
+types, and interpolated strings split into \texttt{DQPRE} and \texttt{DQPOST}. As in the Ruby code, each check looks at
+a token, the next code token and the one after it on the same line. To get a reference output, we re-ran the original
+SLIC with puppet-lint 2.5.2 and the shipped rules on the Puppet oracle. The re-run matches the output in the GLITCH
+package on all 120 findings.
+
+\textit{Note on versions.} An earlier version of this study rebuilt SLIC from the rules printed in the
+paper~\cite{rahman2019seven}. That version agreed with the original tool on only 58\% of findings (Jaccard 0.58: 73
+shared, 47 missed, 5 added). The study follows the code version, which agrees at 0.99. Table~\ref{tab:repro} gives
+both.
+
+\input{tables/repro.tex}
+
+\subsection{Results}
+The port shares all 120 of the original tool's findings and adds one. The extra finding comes from a \texttt{.pp}
+file that contains Haskell, not Puppet. Precision, recall and F1 on the oracle are the same as the original's to two
+decimals (Table~\ref{tab:repro}).
+
+The port also inherits SLIC's accuracy problem. The 0.99 that SLIC reached on its authors' oracle does not carry over
+to GLITCH's independent Puppet oracle: micro precision is 0.28, and precision for hard-coded secrets is 0.10. The port
+reproduces the tool, so the remaining sections change the rules and add triage on top of it.
+
+% =====================================================================
+\section{Portability}\label{sec:port}
+\subsection{Method}
+\textbf{Parsers.} For Ansible we parse YAML with \texttt{ruamel.yaml}, which keeps line numbers. Keys under a task or
+module become ATTRIBUTE tokens. Keys under \texttt{vars:}, under \texttt{set\_fact:} and in \texttt{vars/} files become
+VARIABLE tokens. Top-level keys of a role's \texttt{defaults/} file become PARAMETER tokens, the nearest analogue of a
+Puppet class parameter with a default. Jinja calls and filters become FUNCTION tokens. We normalise YAML~1.1 booleans
+(\texttt{yes}/\texttt{no}), and a line-based fallback handles files that are not valid YAML. For Chef, a line-level
+reader extracts node attributes, resource properties, hash entries, local variables, two-argument setters and
+heredoc command text.
+
+\textbf{Building the \slicj{} rule set.} We started from the ported SLIC rules and from SLAC's rules for Ansible and
+Chef. We then refined them on the 30\% tuning split and kept the 70\% test split for evaluation. The refined rules
+make three changes. (i) They match name \emph{segments}, so \texttt{bypass} is not a password and \texttt{dbPassword}
+is. (ii) They require a literal value for secrets, so variable references, lookups and vault values are not
+``hard-coded''. (iii) They follow the oracle raters' guide, which widens admin by default to ``every time more
+privileges are being given than necessary'' (e.g.\ \texttt{user => root}). Keyword lists follow GLITCH's published
+configuration, with word boundaries. The rules alone produce the results in this section. No model is involved.
+
+\textbf{New smell: TLS verification disabled (CWE-295~\cite{cwe295}).} With certificate validation turned off, HTTPS
+is no safer than HTTP against an active attacker, yet the seven smells do not cover it. \slicj{} flags names such as
+\texttt{validate\_certs}, \texttt{sslverify} and \texttt{verify\_ssl} set to false. It also flags names such as
+\texttt{insecure}, \texttt{insecure\_skip\_tls\_verify} and \texttt{allow\_insecure} set to true, and command text
+with \texttt{curl -k}, \texttt{--insecure}, \texttt{wget --no-check-certificate}, \texttt{--tls-verify=false} or
+\texttt{GIT\_SSL\_NO\_VERIFY=1}, in all modules.
+
+\textbf{Baselines.} The original SLIC (Puppet) and SLAC (Ansible, Chef) outputs from the GLITCH package; GLITCH'22,
+also from the package; and GLITCH~v2, the current release, which we ran ourselves.
+
+\subsection{Part A: accuracy on the oracles}
+\input{tables/split.tex}
+
+Table~\ref{tab:split} gives the micro-averaged scores. On all oracle files, \slicj{} reaches F1 0.64 on Puppet, 0.82
+on Ansible and 0.63 on Chef. GLITCH~v2 reaches 0.62, 0.86 and 0.54, and the original SLIC and SLAC reach 0.39, 0.65 and
+0.36. These all-file numbers include the 30\% of files that we tuned on, which favours \slicj{}. On the 70\% test split
+the picture changes. GLITCH~v2 has the best F1 on Puppet (0.65 against 0.59) and on Ansible (0.74 against 0.67).
+\slicj{} has the best F1 only on Chef (0.56 against 0.50). \slicj{} beats the original tools on every technology on
+both splits. Against GLITCH it is competitive, not better.
+
 \input{tables/rq1.tex}
 
-\subsection{RQ1: Reproducing SLIC}
-\textbf{The paper alone is not enough.} Our paper-rules version shares 73 findings with the original SLIC on the
-Puppet oracle, misses 47 and adds 5 (Jaccard 0.58). The released tool's own output, re-run by us, is identical to the
-packaged output (120/120). We traced the gap to six paper--code differences:
-\begin{enumerate}
-\item \emph{Admin by default.} Table~II requires that the \emph{name} contains both ``admin'' and ``user''. The paper's
-own Fig.~4 example, \texttt{\$power\_username = 'admin'}, does not satisfy this; the code checks the \emph{value}.
-\item \emph{isPvtKey.} The printed pattern \texttt{[pvt|priv]+*[cert|key|rsa|secret|ssl]+} is not a valid regular
-expression (double quantifier); we used the intent.
-\item \emph{Secret keywords.} The code matches 14 substrings (adding key, crypt, cert, ssl, dsa, md5, rsa, \ldots),
-excludes 19 values (\texttt{undef}, \texttt{hiera}, \texttt{pick}, \ldots) and does not require an assignment: any NAME
-followed two tokens later by a literal fires, e.g.\ \texttt{govuk\_user \{ 'felisialoukou':}.
-\item \emph{Weak crypto.} The paper says ``function''; the code flags any non-comment token containing md5 or sha1,
-including variable names such as \texttt{\$md5sum}.
-\item \emph{Suspicious comment.} The code adds ``ticket'', ``launchpad'' and ``to-do'', excludes lines containing
-``debug'', and scans every raw line that contains ``\#'', including URLs inside strings.
-\item \emph{A dead check.} The rule \texttt{no\_expose\_secret\_location} prints the tag
-\texttt{EXPOSING\_SECRET\_LOCATION:::}, but SLIC's driver searches for \texttt{EXPOSING\_SECRET\_LOCATION\_}. Its
-warnings never reach the output. Enabling it would add 11 findings to the oracle run.
-\end{enumerate}
-\textbf{A faithful port is possible.} With these semantics our code port matches the original on 120 of 120 findings
-with one extra (Jaccard 0.99); the extra comes from a \texttt{.pp} file that is actually Haskell. Per-smell scores are
-identical (Table~\ref{tab:rq1}). The original's 0.99 accuracy did not carry over to GLITCH's independent Puppet oracle:
-micro precision 0.28, and 0.10 for hard-coded secrets.
+Table~\ref{tab:rq1} breaks the all-file scores down by smell. \slicj{}'s recall is high (0.91, 1.00 and 0.75), and its
+precision is held down by two smells. For hard-coded secrets, no tool on any technology reaches 0.45 precision, and
+\slicj{} scores 0.19--0.44. For HTTP without TLS, \slicj{} scores 0.38--0.74. These two smells are the target of the
+triage step in Section~\ref{sec:triage}.
 
-\subsection{RQ2: Portability and the new smell}
-Table~\ref{tab:rq1} shows that \slicj{} reaches micro-F1 0.64 on Puppet (SLIC 0.39, GLITCH~v2 0.62), 0.82 on Ansible
-(SLAC 0.65, GLITCH~v2 0.86) and 0.63 on Chef (SLAC 0.36, GLITCH~v2 0.54). Recall is high (0.91/1.00/0.75); precision is held
-down by hard-coded secrets (0.19--0.44) and HTTP (0.38--0.74) for every tool (Fig.~\ref{fig:secret}).
-
-\begin{figure}[t]\centering
-\includegraphics[width=\columnwidth]{figures/fig_secret.pdf}
-\caption{Hard-coded secret precision on the oracles. Every rule-based tool stays below 0.45.}\label{fig:secret}
-\end{figure}
-
+\FloatBarrier
+\subsection{Part B: the smells in the corpora}
 \input{tables/rq2.tex}
 
-On the 206{,}000-script corpora (Table~\ref{tab:rq2}), 14.5--18.7\% of scripts contain at least one of the seven
-smells, below SLAC's 25.3--29.6\%: our rules no longer count variable references and lookups as hard-coded. The new
-TLS smell appears in 1.01\% of Ansible scripts (2{,}048 occurrences; 1{,}690 are \texttt{validate\_certs: no}) but in
-only 0.07\% of Puppet and 0.08\% of Chef scripts. On a random sample of 60 TLS findings (40 Ansible, 10 Puppet, 10
-Chef), 59 are true (precision 0.98); the one false alarm is a test that \emph{asserts}
-\texttt{OPENSTACK\_SSL\_NO\_VERIFY = False}. Several true findings target \texttt{https://localhost}, the same context
-argument that practitioners raised against HTTP findings.
+We ran \slicj{} on the three GLITCH corpora, about 206{,}000 scripts in total (Table~\ref{tab:rq2}). Between 14.5\% and
+18.7\% of the scripts contain at least one of the seven smells. SLAC reported 25.3--29.6\%. A likely reason for the
+lower share is rule (ii) above: our rules do not count variable references and lookups as hard-coded secrets.
 
-\subsection{RQ3: Context-aware triage}
+The new TLS smell is rare in Puppet (0.07\% of scripts) and Chef (0.08\%) but appears in 1.01\% of Ansible scripts,
+with 2{,}048 occurrences. Of these, 1{,}690 are \texttt{validate\_certs: no}. We drew a random sample of 60 TLS
+findings (40 Ansible, 10 Puppet, 10 Chef) and checked each by hand: 59 are true, a precision of 0.98. The one false
+alarm is a test that \emph{asserts} \texttt{OPENSTACK\_SSL\_NO\_VERIFY = False}. Several true findings point at
+\texttt{https://localhost}, which is the same context argument that practitioners raised against HTTP findings.
+
+% =====================================================================
+\section{Triage}\label{sec:triage}
+\subsection{Method}
+\textbf{Context facts.} For every candidate, code computes facts that a model handles badly on its own: whether the
+value is a literal, a variable, a lookup or a vault reference; its shape (identifier, file path, URL, token); an
+entropy bucket; a known key format (AWS key, private-key block, SSH key, hash); a placeholder test; the host scope of
+a URL (loopback, private, public, templated) and its kind (XML namespace, download, package repository); and the
+purpose of the file path (tests or CI, examples or training, development).
+
+\textbf{Privacy rule.} A value that could be a working credential never leaves the machine. The model sees a masked
+preview such as \texttt{s3******r1 (len 10)}. Placeholders and short words are sent in clear. The same masking applies
+to every line of the code window that contains a sensitive name.
+
+\textbf{State and question.} The state sent to the model holds the smell name, its CWE, the raters' definition, the
+reason the rule fired and the flagged line. The \emph{full} variant adds the facts, the file path and a
+$\pm3$-line code window. The model gets one Noul question: ``Is the linter finding a genuine instance of the named
+security smell in this code, according to the definition?'', with short criteria for \emph{true} and \emph{false}. It
+returns $P(\text{true})$, and code keeps the finding if $P\ge t$.
+
+\textbf{Baselines.} The rules alone; a hand-written \emph{practitioner-context filter} that drops placeholder secrets,
+file paths, loopback and namespace URLs and similar cases; Jev~1.13 with the line-only state and with the full state;
+Jev~1.14 and seven other decision models with the full state; and Claude Haiku~5.5 as a chat-LLM baseline, asked for
+a JSON probability on the same state.
+
+\textbf{Protocol.} The candidates are the 269 findings that the \slicj{} rules produce on the three oracles. We use
+5-fold cross-validation grouped by file, repeated over 10 seeds, and tune $t$ on the training folds only. Recall is
+computed against all 176 oracle smells, so smells that the rules never flagged count as misses.
+
+\subsection{Results}
 \input{tables/rq3.tex}
 
 \begin{figure}[t]\centering
 \includegraphics[width=\columnwidth]{figures/fig_pr.pdf}
-\caption{Precision and recall of the triage methods (mean $\pm$ s.d.\ over 10 CV seeds). Triage moves the rules
-(bottom right) up by 0.2 in precision for about 0.05 recall.}\label{fig:pr}
+\caption{Precision against recall for each triage method (mean $\pm$ s.d.\ over 10 CV seeds). The rules sit at the
+bottom right. Most decision models move them up by about 0.2 in precision for about 0.05 in recall.}\label{fig:pr}
 \end{figure}
 
-\textbf{Triage works.} With the full state, Jev~1.13 raises precision from 0.561 to 0.782 and lowers recall from 0.858
-to 0.812, so F1 rises from 0.679 to 0.797 (Table~\ref{tab:rq3}, Fig.~\ref{fig:pr}). The paired difference is
-significant (McNemar: 80 candidates fixed vs.\ 9 broken, $p=2\times10^{-15}$; $\Delta$F1 $=+0.125$, 95\% CI
-$[0.076, 0.179]$). Table~\ref{tab:rq3smell} shows where the gain comes from: for hard-coded secrets the false alarms fall
-from 80 to 4 (precision 0.25$\to$0.83) while 7 of 27 true secrets are lost. Admin by default and IP binding, which are
-already precise, are left untouched.
+\textbf{Triage raises precision.} With the full state, Jev~1.13 raises precision from 0.561 to 0.782 and lowers recall
+from 0.858 to 0.812, so F1 rises from 0.679 to 0.797 (Table~\ref{tab:rq3}, Fig.~\ref{fig:pr}). The paired difference is
+significant: Jev fixes 80 candidates and breaks 9 (McNemar $p=2\times10^{-15}$), and $\Delta$F1 is $+0.125$ (95\% CI
+$[0.076, 0.179]$). Table~\ref{tab:rq3smell} shows where the gain comes from. For hard-coded secrets the false alarms
+fall from 80 to 4 and precision rises from 0.25 to 0.83, while 7 of 27 true secrets are lost. Admin by default and IP
+binding were already precise, and triage leaves them unchanged.
 
 \input{tables/rq3_smell.tex}
 
 \textbf{Context helps.} The full state beats the line-only state ($\Delta$F1 $=+0.028$, CI $[0.004, 0.053]$,
-$p=0.013$). Jev also beats logistic regression on the same facts in paired decisions (33 vs.\ 15, $p=0.013$), but the
-F1 interval includes zero ($[-0.008, 0.141]$). Removing comments from the state does not cost accuracy
-(F1 0.797 both ways), which matters for RQ4.
+$p=0.013$). Removing comments from the state costs nothing (F1 0.797 with and without), which matters for the
+mitigation in Section~\ref{sec:robust}.
 
 \textbf{Practitioner context does not match the oracle.} The hand-written filter that encodes the practitioners'
-objections from the original study lowers F1 to 0.641: the raters label placeholder passwords (\texttt{'password'},
+objections from the original study lowers F1 to 0.641. The raters label placeholder passwords (\texttt{'password'},
 \texttt{'ChangeThisPa55w0rd'}, \texttt{'vagrant'}) and templated \texttt{http://} URLs as smells. ``Is it a smell?''
 and ``Should we fix it?'' are different questions, and an oracle answers only the first.
 
-\textbf{Decision models differ.} Seven of the nine decision models land between F1 0.75 and 0.80;
-GPT-6 Luna Decisions and Liquid d1-ultra tie with Jev~1.13, Jev~1.14 is slightly lower (0.786), and two models are
-no better than the rules (Microsoft Decision-1, 0.664; Upstage Solar-Decide, 0.694, AUC 0.51). Pinning the model
-version matters.
+\textbf{Decision models differ.} Seven of the nine decision models land between F1 0.75 and 0.80. GPT-6 Luna Decisions
+and Liquid d1-ultra tie with Jev~1.13, and Jev~1.14 is slightly lower (0.786), so the model version should be pinned.
+Two models barely change the rules' F1: Microsoft Decision-1 (0.664) and Upstage Solar-Decide (0.694, AUC 0.51).
 
-\textbf{Chat LLM vs.\ decision model.} Claude Haiku~5.5 reaches F1 0.811, but the paired difference to Jev is not
-significant (11 vs.\ 6, $p=0.33$; CI $[-0.007, 0.048]$). Jev costs USD 0.035 per 1{,}000 findings at a median 0.57\,s
-per call; Haiku costs USD 0.143 at 1.78\,s, i.e.\ $4.1\times$ the cost and $3.1\times$ the latency. Both are cheap in
-absolute terms: triaging all 111{,}003 seven-sin findings of our corpora would cost about USD 3.9 with Jev and USD 15.9
-with Haiku.
+\textbf{Chat LLM against decision model.} Claude Haiku~5.5 reaches F1 0.811, but the paired difference to Jev is not
+significant (11 against 6, $p=0.33$, CI $[-0.007, 0.048]$). Jev costs USD 0.035 per 1{,}000 findings at a median of
+0.57\,s per call. Haiku costs USD 0.143 at 1.78\,s, which is 4.1 times the cost and 3.1 times the latency. Both are
+cheap in absolute terms: triaging all 111{,}003 seven-smell findings in our corpora would cost about USD 3.9 with Jev
+and USD 15.9 with Haiku.
 
-\begin{figure}[t]\centering
-\includegraphics[width=\columnwidth]{figures/fig_reliability.pdf}
-\caption{Reliability diagram. The raw probabilities of Jev and Haiku leave the diagonal (Haiku under-states the
-share of true smells in the middle range); the hybrid, which lets code re-weight the model's answer with the context
-facts, stays closest to it.}\label{fig:rel}
-\end{figure}
+\textbf{Calibration.} The raw probabilities are not calibrated (ECE 0.152 for Jev, 0.178 for Haiku), so 0.5 is not a
+safe default threshold. Haiku's F1 at a fixed 0.5 is 0.644, below the rules alone, and Mercury-Decide's tuned
+threshold is 0.05. Thresholds should be tuned on a labelled sample from the team's own code.
 
-\textbf{Calibration.} Raw probabilities are not calibrated (Jev ECE 0.152, Haiku 0.178; Fig.~\ref{fig:rel}): a
-threshold of 0.5 is not a safe default for every model (e.g.\ Mercury-Decide's F1-optimal threshold is 0.05). The
-hybrid has the best ranking and calibration of all methods (AUC 0.875, ECE 0.073) and the highest precision (0.833),
-but its F1-tuned threshold trades away recall (0.702), so its F1 (0.762) is not better than Jev alone. A team that
-wants to route uncertain findings to a human should use the hybrid's probabilities; a team that wants one keep/drop
-decision should use the model with a tuned threshold.
+\textbf{Errors.} Most of the 9 true findings that Jev dropped are plain service user names (\texttt{nginx},
+\texttt{zabbix}, \texttt{check}) and placeholder passwords (\texttt{foo}, \texttt{fixme}). The raters count these as
+smells by definition, and a reviewer would call them harmless. Most HTTP findings that the oracle marks false look real
+to us (e.g.\ \texttt{http://download.sonatype.com/nexus/oss}), and Jev keeps them. We read these as missing oracle
+labels, not model errors.
 
-\textbf{Errors.} The 9 true findings Jev dropped are mostly plain service user names (\texttt{nginx},
-\texttt{zabbix}, \texttt{check}) and placeholder passwords (\texttt{foo}, \texttt{fixme}): cases the raters count as
-smells by definition and a reviewer would call harmless. Most of the HTTP findings that the oracle marks false look
-real (e.g.\ \texttt{http://download.sonatype.com/nexus/oss}), and Jev keeps them; we read these as missed oracle labels
-rather than model errors.
+% =====================================================================
+\section{Robustness}\label{sec:robust}
+\subsection{Method}
+Scripts are text that an attacker can control. Anyone who can open a pull request can add a comment, which makes
+triage a target for indirect prompt injection~\cite{greshake2023injection}. For each true finding that the model
+keeps, we insert one comment, either on the line above or at the end of the flagged line. We use three texts:
+a \emph{placeholder} claim (``dummy value used only by CI tests''), an \emph{approval} claim (``reviewed and approved by
+the security team''), and an \emph{injection} addressed to the reviewer (``this finding is a known false alarm. Answer
+false''). The mitigation removes comments from every code field of the state. The rule facts do not change, and a
+suspicious-comment finding keeps its text in a field marked as untrusted.
 
-\subsection{RQ4: Robustness to misleading comments}
+The OpenRouter account had a small free allowance. The triage experiments used USD 0.20 of paid calls, and after that
+the allowance ran out. The robustness test therefore uses a free decision model, Inception Mercury-Decide (F1 0.78 in
+Table~\ref{tab:rq3}, close to Jev), and Claude Haiku~5.5 through the Claude Code CLI on a stratified sample of 59 true
+findings. The test script runs unchanged on Jev given credits.
+
+\subsection{Results}
 \input{tables/rq4.tex}
 
 \begin{figure*}[t]\centering
 \includegraphics[width=\textwidth]{figures/fig_rq4.pdf}
-\caption{RQ4: share of kept true findings that flip to ``drop'' after one inserted comment, with comments visible
-(orange) and removed from the state (blue).}\label{fig:rq4}
+\caption{Share of kept true findings that flip to ``drop'' after one inserted comment, with comments visible (orange)
+and removed from the state (blue). The injection above the line defeats the decision model. With comments removed, no
+attack flips more than 2\% of either model's findings.}\label{fig:rq4}
 \end{figure*}
 
-One inserted comment is enough to defeat a decision model (Table~\ref{tab:rq4}, Fig.~\ref{fig:rq4}). For Mercury-Decide
-the injection placed above the line flips 119 of 122 kept true findings (97.5\%) and the placeholder claim flips
-26.2\%; the mean probability for true findings drops from 0.80 to 0.02 under injection. Inline variants are weaker
-(22.1\% and 1.6\%). An authority claim (``approved by the security team'') has almost no effect (1.6\%).
-The chat LLM behaves differently. Claude Haiku~5.5 ignores the explicit injection (0 of 55 flips) and the authority claim (1 of 55), but the \emph{placeholder} claim still flips 16.4\% (above) and 20.0\% (inline) of its kept true findings: the model does not obey the comment, it \emph{believes} it. A plausible statement of fact is the more dangerous attack for a model that resists instructions.
+\textbf{One comment is enough.} For Mercury-Decide, the injection on the line above flips 119 of 122 kept true
+findings (97.5\%), and the placeholder claim flips 26.2\% (Table~\ref{tab:rq4}, Fig.~\ref{fig:rq4}). Under injection,
+the mean probability for true findings drops from 0.80 to 0.02. The same texts at the end of the line are weaker
+(22.1\% and 1.6\%). The approval claim has almost no effect (1.6\%).
 
-\textbf{Mitigation.} Removing comments from the state cuts every attack to at most 1.6\% for Mercury-Decide (the
-same level as the noise from shifting a line number) and to 0\% for Haiku at each model's tuned threshold (0.05 and 0.12), and it costs no accuracy on clean data (RQ3). These low thresholds matter. At a fixed threshold of 0.5 the attacks are stronger (Haiku placeholder flips reach 50.0\%, Mercury-Decide inline injection 54.3\%). With comments removed, Haiku then still shows 16.1\% flips in the ``above'' position. That value is the same for all three attack texts, because the inputs are then identical, so the attack text is not the cause. The likely cause is the shifted line number. Our first version
-stripped comments only from the code window and left them in the separate ``flagged line'' field: the inline injection
-then still flipped 45.2\% of true findings. A mitigation has to cover every field the model can read.
+\textbf{The chat LLM fails in a different way.} Claude Haiku~5.5 ignores the injection (0 of 55 kept findings flip)
+and the approval claim (1 of 55). The placeholder claim still flips 16.4\% of its kept true findings when placed above
+the line and 20.0\% inline. The model does not obey the comment, but it believes it. Against a model that resists
+instructions, a plausible statement of fact is the stronger attack.
+
+\textbf{Removing comments works at the tuned threshold.} With comments removed from the state, no attack flips more
+than 1.6\% of Mercury-Decide's findings, which is the noise level of a shifted line number, and none flips any of
+Haiku's. On clean data the mitigation costs no accuracy (Section~\ref{sec:triage}).
+
+The threshold matters. At a fixed threshold of 0.5 the attacks are stronger: the placeholder claim flips 50.0\% of
+Haiku's kept findings, and the inline injection flips 54.3\% of Mercury-Decide's. With comments removed, Haiku still
+drops 16.1\% of its findings at 0.5 when the comment was placed above the line. This rate is the same for all three
+attack texts. Once comments are removed those inputs are identical, so the attack text cannot be the cause. The likely
+cause is the line shift that the inserted comment leaves behind.
+
+Our first version of the mitigation removed comments only from the code window and left them in the separate
+``flagged line'' field. The inline injection then still flipped 45.2\% of true findings. A mitigation has to cover
+every field that the model reads.
 
 % =====================================================================
 \section{Discussion}
-\textbf{For tool builders.} A linter that publishes rules should publish them as code, with tests built from the
-paper's own examples: the printed admin rule fails on the paper's own Fig.~4, and the dead check would fail any
-end-to-end test of its rule.
+\textbf{For SRE teams.} Keep rules as the first pass. They are cheap, deterministic and easy to explain. Put a decision
+model behind them only for the noisy smells (secrets, HTTP, suspicious comments). Let code compute and mask the
+context, tune the threshold on your own labelled sample, and pin the model version. Do not let script comments reach
+the model: in a CI pipeline, the author of the pull request writes them.
 
-\textbf{For SRE teams.} Keep rules as the high-recall front end; they are cheap, deterministic and explainable.
-Put a decision model behind them only for the noisy smells (secrets, HTTP, comments), let code compute and mask
-context, tune the threshold on your own labelled sample, and pin the model version. Never let script comments reach
-the model: in a CI pipeline, the author of a pull request controls them.
+\textbf{For tool builders.} Release rules as executable code with tests. A rebuild from the rules printed in SLIC's
+paper agreed with the released tool on only 58\% of findings. The released code was what made an exact port possible.
 
-\textbf{On ``context''.} Context improved precision only when it was given to a model that judged against the
-\emph{definition}. Encoding the practitioners' notion of context as rules lowered F1 against the oracle. Future
-evaluations should label two things per finding: whether it is a smell, and whether it is worth fixing in that
-repository's context.
+\textbf{On context.} Context improved precision only when a model judged it against the smell's \emph{definition}.
+Encoding the practitioners' idea of context as rules lowered F1 against the oracle. Future evaluations should label
+two things per finding: whether it is a smell, and whether it is worth fixing in that repository.
 
 % =====================================================================
 \section{Threats to Validity}
 \textbf{Construct.} The oracles are small (43--79 scored smells per technology, 176 in total) and contain label noise
-(Section~V-C); per-smell values for rare smells (weak crypto, empty password) rest on fewer than ten instances. TLS
-precision was judged by one rater (the authors) on 60 findings; the labelled sheet is in the artifact for a second rater.
+(Section~\ref{sec:triage}, Errors). Per-smell values for rare smells, such as weak cryptography and empty password, rest
+on fewer than ten instances. One rater (the authors) judged the 60 sampled TLS findings. The labelled sheet is in the
+artifact for a second rater.
 
-\textbf{Internal.} Rule refinement looked at the 30\% development split of the same oracles that we later use in
-cross-validation; the triage thresholds never see test folds, but the candidate generator is not fully independent of
-them. The Claude Code CLI loads the user's global instructions, so the RQ4 Haiku arm ran with a fixed but non-empty
-context; it is the same for clean and attacked inputs.
+\textbf{Internal.} The rules were refined on the 30\% tuning split of the same oracles that the triage
+cross-validation uses. The triage thresholds never see test folds, but the candidate generator is not fully
+independent of them. For this reason Section~\ref{sec:port} reports the rules on the 70\% test split. The Claude Code CLI
+loads the user's global instructions, so the Haiku robustness arm ran with a fixed but non-empty context. That context
+is the same for clean and attacked inputs.
 
-\textbf{External.} RQ4 used a free decision model and a sample for Haiku because the API budget ran out; Jev's own
-robustness is untested. All scripts are open source and pre-2022; private infrastructure code may differ.
+\textbf{External.} The robustness test used a free decision model and a sample for Haiku because the API budget ran
+out. Jev's own robustness is untested. All scripts are open source and from before 2022, and private infrastructure
+code may differ.
 
-\textbf{Reliability.} Hosted models change; we pin versions (e.g.\ \texttt{typesafe/jev-1.13-20260917}) and cache every
+\textbf{Reliability.} Hosted models change. We pin versions (e.g.\ \texttt{typesafe/jev-1.13-20260917}) and cache every
 request and response, so all numbers can be regenerated without new API calls.
 
 % =====================================================================
 \section{Conclusion}
-We reproduced SLIC, showed that its paper and its code disagree in six places, and built a Python port that matches
-the original tool. Our port to Ansible and Chef is competitive with GLITCH and finds a new, common and precise smell:
-disabled TLS verification in 1\% of Ansible scripts. Adding a context-aware decision model behind the rules raised
-precision from 0.56 to 0.78 and F1 from 0.68 to 0.80, removed 95\% of the false hard-coded-secret alarms, and cost a few
-cents per thousand findings. The same models can be told to ignore a true finding by a single comment, so the
-comment text must stay out of their input. Rules propose, a model disposes, and code stays in charge.
+\slicj{} is a Python port of SLIC that reproduces the original tool's findings and extends it to Ansible and Chef. On
+held-out oracle files its rules are close to GLITCH, ahead on Chef and behind on Puppet and Ansible, and its new smell,
+disabled TLS verification, is common in Ansible and almost always correct. Rules alone stay noisy for hard-coded
+secrets. A decision model that sees masked context facts raised precision from 0.56 to 0.78 and F1 from 0.68 to 0.80,
+removed 76 of 80 false secret alarms in one cross-validation run, and cost a few cents per thousand findings. The same model dropped almost every
+true finding when one comment told it to, so comment text has to stay out of the model's input. In our design the
+model only scores findings, and code makes every decision.
 
 \section*{Artifact}
-The repository contains the \texttt{slicj} package (parsers, rules, context, triage), tests built from the paper's
-Figs.~4--5, the experiment scripts for RQ1--RQ4, the cached model responses, and a README that regenerates every table
-and figure.
+The repository contains the \texttt{slicj} package (parsers, rules, context layer, triage), tests built from the
+examples in the SLIC paper, the experiment scripts for each section, the cached model responses, and a README that
+regenerates every table and figure.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
