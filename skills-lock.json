@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "academic-paper-reviewer": {
+      "source": "imbad0202/academic-research-skills",
+      "sourceType": "github",
+      "skillPath": "academic-paper-reviewer/SKILL.md",
+      "computedHash": "cbb06d6ec8b68df46ab044e3ba8a0bb1fe7fb9394b2382123e65b624ce9ccba5"
+    },
+    "paper-audit": {
+      "source": "bahayonghang/academic-writing-skills",
+      "sourceType": "github",
+      "skillPath": "academic-writing-skills/paper-audit/SKILL.md",
+      "computedHash": "9a2d0db5b74f208b0a29339eb9cd5efced98f76a88f1e149e3aa431e41738d48"
+    }
+  }
+}
