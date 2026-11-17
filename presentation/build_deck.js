@@ -156,6 +156,7 @@ const SEC3 = "Backup slides";
   for (let i = 1; i <= 7; i++) badge(s, i, 0.8 + (i - 1) * 0.72, 3.85, 0.56, C.accent1);
   text(s, "Adheil Gupta (23BDS002)   |   Om Pandey (23BDS040)", 0.8, 4.95, 11, 0.4, { fontSize: 20, bold: true, color: C.background1 });
   text(s, "Course project, Cloud SRE and Security", 0.8, 5.4, 11, 0.35, { fontSize: 16, color: C.background1 });
+  s.addText([{ text: "Paper (GitHub): ", options: { color: C.background1 } }, { text: "https://github.com/iAmAdheil/slicj-seven-sins-revisited/blob/main/paper.pdf", options: { color: C.background1, underline: true, hyperlink: { url: "https://github.com/iAmAdheil/slicj-seven-sins-revisited/blob/main/paper.pdf" } } }], { x: 0.8, y: 5.85, w: 11.7, h: 0.35, fontSize: 15, margin: 0, fontFace: THEME.bodyFontFace || undefined });
   text(s, "Based on: A. Rahman, C. Parnin, L. Williams, “The Seven Sins: Security Smells in Infrastructure as Code Scripts”, ICSE 2019", 0.8, 6.3, 11.7, 0.35, { fontSize: 13, color: C.background1 });
 }
 

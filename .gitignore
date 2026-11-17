@@ -13,9 +13,6 @@ __pycache__/
 paper/preview/
 presentation/node_modules/
 presentation/render/
-.agents/
-.claude/
-skills-lock.json
 *.aux
 *.log
 !results/*.log
