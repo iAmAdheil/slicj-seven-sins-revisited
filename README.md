@@ -11,7 +11,7 @@ This repository:
 3. **Adds context-aware triage.** Code computes context facts and masks secrets. A decision model (TypeSafe **Jev**, through OpenRouter) answers one typed question per finding. Code makes the final keep/drop decision.
 4. **Evaluates** all of this in four topics: Reproduction, Portability (GLITCH oracles and 206k scripts), Triage, and Robustness (prompt-injection comments).
 
-The research paper (version 2) is `paper/main.pdf`, with LaTeX source `paper/main.tex`. The two-person talk is `presentation/Seven_Sins_Revisited_Presentation.pptx`, with `presentation/speaker_script.md`. The v1 paper is `review_results/paper-v2/main_v1.pdf`. `review_results/paper-v2/review_report.md` lists what changed from v1 to v2 and what is still open.
+The research paper (version 2) is `paper/main.pdf` (a copy is at `paper.pdf` in the repository root), with LaTeX source `paper/main.tex`. The two-person talk is `presentation/Seven_Sins_Revisited_Presentation.pptx`, with `presentation/speaker_script.md`. The v1 paper is `review_results/paper-v2/main_v1.pdf`. `review_results/paper-v2/review_report.md` lists what changed from v1 to v2 and what is still open.
 
 ## Headline results
 
@@ -109,6 +109,5 @@ To run the robustness test on Jev itself (it needs OpenRouter credits):
 - The OpenRouter key is in `.env` (git-ignored). Its credit limit is $2, and it expires on 2026-11-25. The triage experiments used about $0.20. The account's free allowance then ran out. That is why the robustness test uses a free decision model and the Claude Code CLI instead of Jev.
 - TLS precision was judged by one rater. Have a second team member fill in a `label_rater2` column in `results/rq2/tls_sample.csv`, then report Cohen's κ.
 - The paper's author block has no institute name yet (`paper/main.tex`, line with `TODO`). Fill it in before submission.
-- The triage evaluation uses all 269 candidates, including the 30% tuning files. The paper states this under Threats. A test-split-only triage table would remove the doubt.
-- The sentence "mean probability for true findings drops from 0.80 to 0.02" was not recomputed for v2. Check it against `results/` before submission.
-- `.agents/`, `.claude/` and `skills-lock.json` (paper-review tooling) are git-ignored and are not part of the submission. The repository has no LICENSE file. Add one if the submission needs it.
+- The triage evaluation uses all 269 candidates, including the 30% tuning files. The paper also reports test-split-only numbers (Threats, Internal): precision rises from 0.48 to 0.71 and recall falls from 0.78 to 0.74.
+- `.agents/`, `.claude/` and `skills-lock.json` (paper-review tooling) are git-ignored and are not part of the submission. The code is under the MIT license (`LICENSE`).

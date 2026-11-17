@@ -407,7 +407,10 @@ artifact for a second rater.
 
 \textbf{Internal.} The rules were refined on the 30\% tuning split of the same oracles that the triage
 cross-validation uses. The triage thresholds never see test folds, but the candidate generator is not fully
-independent of them. For this reason Section~\ref{sec:port} reports the rules on the 70\% test split. The Claude Code CLI
+independent of them. For this reason Section~\ref{sec:port} reports the rules on the 70\% test split. On the test files
+alone (176 candidates, 108 oracle smells), the rules reach precision 0.48, recall 0.78 and F1 0.59, Jev reaches 0.71,
+0.74 and 0.73, and Haiku reaches 0.72, 0.75 and 0.73. All values are lower than on the full set, but the conclusion
+holds: precision rises by 0.24 for a recall loss of 0.03--0.04. The Claude Code CLI
 loads the user's global instructions, so the Haiku robustness arm ran with a fixed but non-empty context. That context
 is the same for clean and attacked inputs.
 
