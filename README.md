@@ -110,4 +110,4 @@ To run the robustness test on Jev itself (it needs OpenRouter credits):
 - TLS precision was judged by one rater. Have a second team member fill in a `label_rater2` column in `results/rq2/tls_sample.csv`, then report Cohen's κ.
 - The paper's author block has no institute name yet (`paper/main.tex`, line with `TODO`). Fill it in before submission.
 - The triage evaluation uses all 269 candidates, including the 30% tuning files. The paper also reports test-split-only numbers (Threats, Internal): precision rises from 0.48 to 0.71 and recall falls from 0.78 to 0.74.
-- `.agents/`, `.claude/` and `skills-lock.json` (paper-review tooling) are git-ignored and are not part of the submission. The code is under the MIT license (`LICENSE`).
+- `.agents/`, `.claude/` and `skills-lock.json` hold the paper-review skills that we used. The code is under the MIT license (`LICENSE`).
