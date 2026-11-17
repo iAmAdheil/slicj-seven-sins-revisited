@@ -11,7 +11,7 @@ This repository:
 3. **Adds context-aware triage.** Code computes context facts and masks secrets. A decision model (TypeSafe **Jev**, through OpenRouter) answers one typed question per finding. Code makes the final keep/drop decision.
 4. **Evaluates** all of this in four topics: Reproduction, Portability (GLITCH oracles and 206k scripts), Triage, and Robustness (prompt-injection comments).
 
-The research paper is `paper/main.pdf` (LaTeX source `paper/main.tex`). The two-person talk is `presentation/Seven_Sins_Revisited_Presentation.pptx`, with `presentation/speaker_script.md`.
+The research paper (version 2) is `paper/main.pdf`, with LaTeX source `paper/main.tex`. The two-person talk is `presentation/Seven_Sins_Revisited_Presentation.pptx`, with `presentation/speaker_script.md`. The v1 paper is `review_results/paper-v2/main_v1.pdf`. `review_results/paper-v2/review_report.md` lists what changed from v1 to v2 and what is still open.
 
 ## Headline results
 
@@ -19,7 +19,7 @@ The research paper is `paper/main.pdf` (LaTeX source `paper/main.tex`). The two-
 |---|---|
 | Reproduction | The code port matches the original SLIC at Jaccard 0.99 (120 of 120 findings, 1 extra). An earlier rebuild from the rules printed in the paper matched at 0.58. The study follows the code. |
 | Portability | SLIC-J micro-F1 on the 70% test split is 0.59 / 0.67 / 0.56 (Puppet / Ansible / Chef). GLITCH v2 scores 0.65 / 0.74 / 0.50. On all files (including the 30% tuning split): 0.64 / 0.82 / 0.63 against 0.62 / 0.86 / 0.54. The new TLS smell is in 1.01% of 107,955 Ansible scripts, with 59/60 sampled findings correct. |
-| Triage | Jev triage moves precision from 0.561 to 0.782 and recall from 0.858 to 0.812 (F1 0.679 → 0.797, McNemar p = 2e-15). For hard-coded secrets, false alarms drop from 80 to 4. Claude Haiku 5.5 reaches F1 0.811 (difference not significant) at 4× the cost and 3× the latency. |
+| Triage | Jev triage moves precision from 0.561 to 0.782 and recall from 0.858 to 0.812 (F1 0.679 → 0.797, McNemar p = 2e-15). For hard-coded secrets, false alarms drop from 80 to 4 (one cross-validation run). Claude Haiku 5.5 reaches F1 0.811 (difference not significant) at 4× the cost and 3× the latency. |
 | Robustness | One injected comment flips 97.5% of a decision model's true findings to "safe". A chat LLM ignores the injection, but a "dummy value" comment flips up to 20% of its true findings. Removing comments from the model input brings every attack down to ≤ 1.6% at each model's tuned threshold (rates are higher at a fixed 0.5, see the paper). |
 
 ## Layout
@@ -36,9 +36,12 @@ slicj/                    the tool
   evaluate.py             GLITCH matching protocol, precision/recall
   cli.py                  python -m slicj scan DIR
 experiments/              one script per topic + analysis.py (tables/figures)
+  demo_pipeline.py        whole pipeline on one script, stage by stage (no files, no API calls)
+  check_port.py, check_published.py, peek.py   debugging aids (port diff, scorer check, dev-split errors)
 tests/                    pytest, incl. the paper's Fig. 4 / Fig. 5 examples
 results/                  all outputs; results/cache holds every model request/response
-paper/                    LaTeX paper, generated tables and figures, compiled PDF
+paper/                    LaTeX paper (v2), generated tables and figures, compiled PDF
+review_results/           v1 PDF and the v1 -> v2 audit report
 presentation/             slide deck, speaker script, deck generator
 data/, tools/, .venv/     downloaded datasets and tools (git-ignored, re-creatable)
 ```
@@ -49,6 +52,14 @@ data/, tools/, .venv/     downloaded datasets and tools (git-ignored, re-creatab
 .venv/bin/python -m slicj scan path/to/repo --rules slicj --out report.csv
 # report.csv: per-script counts (SLIC format); report_lines.csv: one row per finding with line number
 ```
+
+## Try the pipeline on one script
+
+```bash
+.venv/bin/python experiments/demo_pipeline.py [FILE] [--threshold 0.5] [--show-state N] [--variant full]
+```
+
+It prints every stage: parse, rules, context facts, masked state, model answer, keep/drop, and the oracle check. It reads model answers from `results/cache` and never calls the API. Use a file from the GLITCH oracle dataset (`data/glitch_rootfs/RESULTS/*/oracle-dataset`).
 
 ## Reproduce everything
 
@@ -82,6 +93,10 @@ curl -L -o data/downloads/glitch_pkg/glitch-latest.tar https://ndownloader.figsh
 cd paper && ../tools/tectonic -X compile main.tex
 ```
 
+Build the paper on Overleaf: zip `paper/main.tex`, `paper/references.bib`, `paper/figures/` and `paper/tables/`, then use New Project → Upload Project. Set the compiler to pdfLaTeX. The paper uses the `IEEEtran` class.
+
+Rebuild the slide deck with `cd presentation && npm install && node build_deck.js`. Run `sh render.sh` to render it to images (needs the LibreOffice copy in `tools/lo`).
+
 To run the robustness test on Jev itself (it needs OpenRouter credits):
 
 ```bash
@@ -93,4 +108,7 @@ To run the robustness test on Jev itself (it needs OpenRouter credits):
 
 - The OpenRouter key is in `.env` (git-ignored). Its credit limit is $2, and it expires on 2026-11-25. The triage experiments used about $0.20. The account's free allowance then ran out. That is why the robustness test uses a free decision model and the Claude Code CLI instead of Jev.
 - TLS precision was judged by one rater. Have a second team member fill in a `label_rater2` column in `results/rq2/tls_sample.csv`, then report Cohen's κ.
-- The paper's author block has no institute name yet (`paper/main.tex`, line with `TODO`).
+- The paper's author block has no institute name yet (`paper/main.tex`, line with `TODO`). Fill it in before submission.
+- The triage evaluation uses all 269 candidates, including the 30% tuning files. The paper states this under Threats. A test-split-only triage table would remove the doubt.
+- The sentence "mean probability for true findings drops from 0.80 to 0.02" was not recomputed for v2. Check it against `results/` before submission.
+- `.agents/`, `.claude/` and `skills-lock.json` (paper-review tooling) are git-ignored and are not part of the submission. The repository has no LICENSE file. Add one if the submission needs it.
